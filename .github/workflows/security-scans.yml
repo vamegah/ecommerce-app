@@ -1,0 +1,132 @@
+name: Security - Dependency, Container, Secret, IaC
+
+on:
+  pull_request:
+  push:
+    branches: [main, master]
+  schedule:
+    - cron: "45 3 * * 1"
+
+jobs:
+  dependency-audit:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install pip-audit
+        run: python -m pip install --upgrade pip pip-audit
+
+      - name: Run pip audit
+        run: pip-audit -r requirements-ci.txt --format json --output pip-audit.json
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: NPM audit (addresses)
+        working-directory: addresses
+        run: npm audit --json > ../npm-audit-addresses.json || true
+
+      - name: NPM audit (comparison)
+        working-directory: comparison
+        run: npm audit --json > ../npm-audit-comparison.json || true
+
+      - name: NPM audit (filters)
+        working-directory: filters
+        run: npm audit --json > ../npm-audit-filters.json || true
+
+      - name: NPM audit (inventory_alerts)
+        working-directory: inventory_alerts
+        run: npm audit --json > ../npm-audit-inventory-alerts.json || true
+
+      - name: NPM audit (orders/tracking)
+        working-directory: orders/tracking
+        run: npm audit --json > ../../npm-audit-orders-tracking.json || true
+
+      - name: Upload dependency audit artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: dependency-audits
+          path: |
+            pip-audit.json
+            npm-audit-*.json
+
+  trivy-container-scan:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Build web image
+        run: docker build -f Dockerfile -t greatkart-web:scan .
+
+      - name: Build worker image
+        run: docker build -f Dockerfile.worker -t greatkart-worker:scan .
+
+      - name: Trivy web image scan
+        uses: aquasecurity/trivy-action@0.24.0
+        with:
+          image-ref: greatkart-web:scan
+          format: sarif
+          output: trivy-web.sarif
+          severity: CRITICAL,HIGH
+          ignore-unfixed: true
+
+      - name: Trivy worker image scan
+        uses: aquasecurity/trivy-action@0.24.0
+        with:
+          image-ref: greatkart-worker:scan
+          format: sarif
+          output: trivy-worker.sarif
+          severity: CRITICAL,HIGH
+          ignore-unfixed: true
+
+      - name: Upload Trivy reports
+        uses: actions/upload-artifact@v4
+        with:
+          name: trivy-reports
+          path: |
+            trivy-web.sarif
+            trivy-worker.sarif
+
+      - name: Setup Python for security gates
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install gate dependencies
+        run: python -m pip install --upgrade pip pyyaml
+
+      - name: Enforce security gate thresholds
+        run: python security/policy/enforce_security_gates.py
+
+  secret-scan:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Gitleaks scan
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITLEAKS_CONFIG: .gitleaks.toml
+
+  iac-scan:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Checkov IaC scan
+        uses: bridgecrewio/checkov-action@v12
+        with:
+          directory: infra/terraform
+          config_file: infra/terraform/policy/checkov.yaml

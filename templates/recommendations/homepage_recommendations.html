@@ -1,0 +1,31 @@
+{% if homepage_recommendations %}
+<section class="section-name padding-y-sm">
+    <div class="container">
+        <header class="section-heading">
+            <h3 class="section-title">{{ recommendation_heading|default:"Recommended Products" }}</h3>
+        </header>
+        <div class="row">
+            {% for product in homepage_recommendations %}
+            <div class="col-md-3">
+                <div class="card card-product-grid">
+                    <a href="{{ product.get_slug_url }}" class="img-wrap recommendation-link"
+                       data-source-type="homepage"
+                       data-source-product-id=""
+                       data-recommended-product-id="{{ product.id }}">
+                        <img src="{{ product.images.url }}" alt="{{ product.product_name }}">
+                    </a>
+                    <figcaption class="info-wrap">
+                        <a href="{{ product.get_slug_url }}" class="title recommendation-link"
+                           data-source-type="homepage"
+                           data-source-product-id=""
+                           data-recommended-product-id="{{ product.id }}">{{ product.product_name }}</a>
+                        <div class="price mt-1">$ {{ product.price }}</div>
+                        <small>{% if product.is_available and product.stock > 0 %}In Stock{% else %}Out of Stock{% endif %}</small>
+                    </figcaption>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+{% endif %}

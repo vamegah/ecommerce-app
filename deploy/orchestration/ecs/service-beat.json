@@ -1,0 +1,20 @@
+{
+  "serviceName": "greatkart-beat",
+  "cluster": "greatkart-cluster",
+  "taskDefinition": "greatkart-beat",
+  "desiredCount": 1,
+  "launchType": "FARGATE",
+  "platformVersion": "LATEST",
+  "deploymentConfiguration": {
+    "maximumPercent": 100,
+    "minimumHealthyPercent": 0
+  },
+  "networkConfiguration": {
+    "awsvpcConfiguration": {
+      "subnets": ["subnet-aaaaaaaa", "subnet-bbbbbbbb"],
+      "securityGroups": ["sg-aaaaaaaa"],
+      "assignPublicIp": "DISABLED"
+    }
+  },
+  "enableExecuteCommand": true
+}

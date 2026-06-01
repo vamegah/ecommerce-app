@@ -1,0 +1,26 @@
+[DEFAULT]
+bantime = 1h
+findtime = 10m
+maxretry = 5
+backend = systemd
+
+[sshd]
+enabled = true
+port = ssh
+logpath = %(sshd_log)s
+maxretry = 4
+
+[nginx-http-auth]
+enabled = true
+port = http,https
+logpath = /var/log/nginx/error.log
+maxretry = 3
+
+[greatkart-auth]
+enabled = true
+port = http,https
+filter = greatkart-auth
+logpath = /var/log/nginx/access.log
+maxretry = 10
+findtime = 10m
+bantime = 2h

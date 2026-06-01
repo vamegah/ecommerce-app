@@ -1,0 +1,29 @@
+groups:
+  - name: greatkart-golden-signals
+    rules:
+      - alert: GreatKartHighErrorRate
+        expr: |
+          sum(rate(http_requests_total{status=~"5.."}[5m])) /
+          sum(rate(http_requests_total[5m])) > 0.03
+        for: 5m
+        labels:
+          severity: critical
+          service: web
+        annotations:
+          summary: "High HTTP 5xx error rate"
+      - alert: GreatKartHighLatencyP95
+        expr: histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket[5m])) by (le)) > 0.75
+        for: 10m
+        labels:
+          severity: warning
+          service: web
+        annotations:
+          summary: "P95 latency above 750ms"
+      - alert: GreatKartPodDown
+        expr: up{job="greatkart-web"} == 0
+        for: 2m
+        labels:
+          severity: critical
+          service: web
+        annotations:
+          summary: "GreatKart web target is down"

@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<section class="section-content padding-y">
+    <div class="container">
+        <h3>Recommendation Analytics</h3>
+        <table class="table table-bordered">
+            <thead>
+                <tr><th>Source</th><th>Clicks</th><th>Conversions</th><th>Conversion Rate</th></tr>
+            </thead>
+            <tbody>
+                {% for metric in source_metrics %}
+                <tr>
+                    <td>{{ metric.source_type }}</td>
+                    <td>{{ metric.clicks }}</td>
+                    <td>{{ metric.conversions }}</td>
+                    <td>{{ metric.ctr|floatformat:2 }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        <h4>Top Recommendation Pairs</h4>
+        <table class="table table-striped">
+            <thead>
+                <tr><th>Source Product</th><th>Recommended Product</th><th>Clicks</th></tr>
+            </thead>
+            <tbody>
+                {% for pair in top_pairs %}
+                <tr>
+                    <td>{{ pair.source_product_id }}</td>
+                    <td>{{ pair.recommended_product_id }}</td>
+                    <td>{{ pair.total }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</section>
+{% endblock %}

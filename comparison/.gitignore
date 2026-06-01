@@ -1,0 +1,21 @@
+# Node modules
+node_modules/
+
+# Build output
+static/comparison/ts/dist/
+
+# Test coverage
+coverage/
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db

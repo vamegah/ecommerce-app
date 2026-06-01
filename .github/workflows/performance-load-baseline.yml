@@ -1,0 +1,21 @@
+name: Performance Load Baseline
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 6 * * 1"
+
+jobs:
+  load-test-staging:
+    runs-on: ubuntu-latest
+    environment: staging
+    if: ${{ secrets.STAGING_PUBLIC_URL != '' }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Run k6 baseline
+        uses: grafana/run-k6-action@v1
+        with:
+          path: performance/k6/load-baseline.js
+          flags: --env TARGET_URL=${{ secrets.STAGING_PUBLIC_URL }}

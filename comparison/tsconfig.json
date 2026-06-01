@@ -1,0 +1,17 @@
+{
+  "compilerOptions": {
+    "target": "ES2020",
+    "module": "ESNext",
+    "lib": ["ES2020", "DOM"],
+    "outDir": "./static/comparison/ts/dist",
+    "rootDir": "./static/comparison/ts",
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "moduleResolution": "node",
+    "resolveJsonModule": true,
+    "types": ["vitest/globals"]
+  },
+  "include": ["static/comparison/ts/**/*"],
+  "exclude": ["node_modules", "static/comparison/ts/tests"]
+}

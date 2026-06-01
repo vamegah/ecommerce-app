@@ -1,0 +1,147 @@
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: greatkart
+      POSTGRES_USER: greatkart
+      POSTGRES_PASSWORD: greatkart
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U greatkart -d greatkart"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  redis:
+    image: redis:7-alpine
+    command: ["redis-server", "--appendonly", "yes"]
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      DJANGO_SETTINGS_MODULE: greatkartecommerce.settings
+      DJANGO_CONFIGURATION: Dev
+      SECRET_KEY: dev-secret
+      DEBUG: "True"
+      SILENCE_IMAGEFIELD_CHECKS: "1"
+      EMAIL_HOST_USER: dev@example.com
+      EMAIL_HOST_PASSWORD: dev-password
+      DB_ENGINE: postgres
+      POSTGRES_DB: greatkart
+      POSTGRES_USER: greatkart
+      POSTGRES_PASSWORD: greatkart
+      POSTGRES_HOST: db
+      POSTGRES_PORT: "5432"
+      CACHE_BACKEND: redis
+      REDIS_URL: redis://redis:6379/1
+      CELERY_BROKER_URL: redis://redis:6379/2
+      CELERY_RESULT_BACKEND: redis://redis:6379/3
+    command: >
+      sh -c "python manage.py migrate --noinput &&
+             python manage.py collectstatic --noinput &&
+             gunicorn greatkartecommerce.wsgi:application --bind 0.0.0.0:8000 --workers 3 --threads 2 --timeout 60"
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS http://localhost:8000/healthz/ || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+    cpus: 1.0
+    mem_limit: 1024m
+
+  worker:
+    build:
+      context: .
+      dockerfile: Dockerfile.worker
+    environment:
+      DJANGO_SETTINGS_MODULE: greatkartecommerce.settings
+      DJANGO_CONFIGURATION: Dev
+      SECRET_KEY: dev-secret
+      DEBUG: "True"
+      SILENCE_IMAGEFIELD_CHECKS: "1"
+      EMAIL_HOST_USER: dev@example.com
+      EMAIL_HOST_PASSWORD: dev-password
+      DB_ENGINE: postgres
+      POSTGRES_DB: greatkart
+      POSTGRES_USER: greatkart
+      POSTGRES_PASSWORD: greatkart
+      POSTGRES_HOST: db
+      POSTGRES_PORT: "5432"
+      CACHE_BACKEND: redis
+      REDIS_URL: redis://redis:6379/1
+      CELERY_BROKER_URL: redis://redis:6379/2
+      CELERY_RESULT_BACKEND: redis://redis:6379/3
+    command: celery -A greatkartecommerce worker --loglevel=INFO --concurrency=4
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+    cpus: 1.0
+    mem_limit: 1024m
+
+  beat:
+    build:
+      context: .
+      dockerfile: Dockerfile.worker
+    environment:
+      DJANGO_SETTINGS_MODULE: greatkartecommerce.settings
+      DJANGO_CONFIGURATION: Dev
+      SECRET_KEY: dev-secret
+      DEBUG: "True"
+      SILENCE_IMAGEFIELD_CHECKS: "1"
+      EMAIL_HOST_USER: dev@example.com
+      EMAIL_HOST_PASSWORD: dev-password
+      DB_ENGINE: postgres
+      POSTGRES_DB: greatkart
+      POSTGRES_USER: greatkart
+      POSTGRES_PASSWORD: greatkart
+      POSTGRES_HOST: db
+      POSTGRES_PORT: "5432"
+      CACHE_BACKEND: redis
+      REDIS_URL: redis://redis:6379/1
+      CELERY_BROKER_URL: redis://redis:6379/2
+      CELERY_RESULT_BACKEND: redis://redis:6379/3
+    command: celery -A greatkartecommerce beat --loglevel=INFO
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+    cpus: 0.5
+    mem_limit: 512m
+
+  nginx:
+    image: nginx:1.27-alpine
+    ports:
+      - "8080:80"
+    volumes:
+      - ./deploy/runtime/nginx/greatkart-docker.conf:/etc/nginx/conf.d/default.conf:ro
+      - .:/app:ro
+    depends_on:
+      web:
+        condition: service_healthy
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+  redis_data:

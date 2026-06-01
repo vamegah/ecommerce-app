@@ -1,0 +1,22 @@
+aws_region             = "us-east-1"
+vpc_cidr               = "10.30.0.0/16"
+public_subnets         = { a = { cidr = "10.30.1.0/24", az = "us-east-1a" }, b = { cidr = "10.30.2.0/24", az = "us-east-1b" } }
+private_subnets        = { a = { cidr = "10.30.11.0/24", az = "us-east-1a" }, b = { cidr = "10.30.12.0/24", az = "us-east-1b" } }
+security_group_ids     = ["sg-xxxxxxxx"]
+db_instance_class      = "db.t4g.medium"
+db_allocated_storage   = 100
+db_name                = "greatkart"
+db_username            = "greatkart"
+db_password            = "replace-me"
+media_bucket_name      = "greatkart-prod-media"
+domain_name            = "shop.example.com"
+zone_id                = "ZXXXXXXXXXXXXX"
+record_name            = "shop.example.com"
+alb_dns_name           = "prod-alb-123.us-east-1.elb.amazonaws.com"
+alb_zone_id            = "Z35SXDOTRQ7X7K"
+web_task_definition_arn = "arn:aws:ecs:us-east-1:111111111111:task-definition/greatkart-web:1"
+tags = {
+  Project     = "greatkart"
+  Environment = "prod"
+  Owner       = "platform"
+}

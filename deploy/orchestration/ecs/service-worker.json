@@ -1,0 +1,20 @@
+{
+  "serviceName": "greatkart-worker",
+  "cluster": "greatkart-cluster",
+  "taskDefinition": "greatkart-worker",
+  "desiredCount": 1,
+  "launchType": "FARGATE",
+  "platformVersion": "LATEST",
+  "deploymentConfiguration": {
+    "maximumPercent": 200,
+    "minimumHealthyPercent": 100
+  },
+  "networkConfiguration": {
+    "awsvpcConfiguration": {
+      "subnets": ["subnet-aaaaaaaa", "subnet-bbbbbbbb"],
+      "securityGroups": ["sg-aaaaaaaa"],
+      "assignPublicIp": "DISABLED"
+    }
+  },
+  "enableExecuteCommand": true
+}

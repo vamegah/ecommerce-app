@@ -1,0 +1,24 @@
+aws_region             = "__AWS_REGION__"
+name_prefix            = "greatkart-pr-__PR_NUMBER__"
+vpc_cidr               = "__VPC_CIDR__"
+public_subnets         = { a = { cidr = "__PUB_A__", az = "__AZ_A__" }, b = { cidr = "__PUB_B__", az = "__AZ_B__" } }
+private_subnets        = { a = { cidr = "__PRIV_A__", az = "__AZ_A__" }, b = { cidr = "__PRIV_B__", az = "__AZ_B__" } }
+security_group_ids     = ["__SECURITY_GROUP_ID__"]
+db_instance_class      = "__DB_INSTANCE_CLASS__"
+db_allocated_storage   = __DB_ALLOCATED_STORAGE__
+db_name                = "greatkart"
+db_username            = "greatkart"
+db_password            = "__DB_PASSWORD__"
+media_bucket_name      = "__MEDIA_BUCKET__"
+domain_name            = "__DOMAIN_NAME__"
+zone_id                = "__ZONE_ID__"
+record_name            = "__RECORD_NAME__"
+alb_dns_name           = "__ALB_DNS_NAME__"
+alb_zone_id            = "__ALB_ZONE_ID__"
+web_task_definition_arn = "__WEB_TASKDEF_ARN__"
+tags = {
+  Project     = "greatkart"
+  Environment = "preview"
+  Owner       = "platform"
+  PullRequest = "__PR_NUMBER__"
+}

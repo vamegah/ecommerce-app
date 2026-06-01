@@ -1,0 +1,13 @@
+[Unit]
+Description=GreatKart backup freshness verification
+After=network.target
+
+[Service]
+Type=oneshot
+User=greatkart
+Group=www-data
+EnvironmentFile=-/etc/greatkart/runtime-bootstrap.env
+EnvironmentFile=/run/greatkart/runtime.env
+ExecStartPre=/usr/bin/mkdir -p /run/greatkart
+ExecStartPre=/bin/bash /opt/greatkart/current/deploy/runtime/scripts/render_runtime_env_from_secretsmanager.sh /run/greatkart/runtime.env
+ExecStart=/opt/greatkart/current/deploy/runtime/scripts/verify_backup_freshness.sh

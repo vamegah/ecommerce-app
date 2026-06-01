@@ -1,0 +1,14 @@
+{
+  "compilerOptions": {
+    "target": "ES2020",
+    "module": "commonjs",
+    "lib": ["ES2020", "DOM"],
+    "outDir": "./static/js/filters/dist",
+    "rootDir": "./static/js/filters",
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true
+  },
+  "include": ["static/js/filters/**/*"],
+  "exclude": ["node_modules", "static/js/filters/tests"]
+}

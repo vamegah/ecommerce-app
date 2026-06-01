@@ -1,0 +1,42 @@
+{
+  "family": "greatkart-beat",
+  "networkMode": "awsvpc",
+  "requiresCompatibilities": ["FARGATE"],
+  "cpu": "512",
+  "memory": "1024",
+  "executionRoleArn": "arn:aws:iam::<account-id>:role/ecsTaskExecutionRole",
+  "taskRoleArn": "arn:aws:iam::<account-id>:role/greatkartTaskRole",
+  "containerDefinitions": [
+    {
+      "name": "beat",
+      "image": "ghcr.io/<owner>/<repo>/greatkart-worker:latest",
+      "essential": true,
+      "command": ["celery", "-A", "greatkartecommerce", "beat", "--loglevel=INFO"],
+      "environment": [
+        { "name": "DJANGO_SETTINGS_MODULE", "value": "greatkartecommerce.settings" },
+        { "name": "DJANGO_CONFIGURATION", "value": "Prod" },
+        { "name": "DB_ENGINE", "value": "postgres" },
+        { "name": "CACHE_BACKEND", "value": "redis" },
+        { "name": "POSTGRES_SSLMODE", "value": "require" }
+      ],
+      "secrets": [
+        { "name": "SECRET_KEY", "valueFrom": "arn:aws:secretsmanager:<region>:<account-id>:secret:greatkart/secret-key" },
+        { "name": "POSTGRES_DB", "valueFrom": "arn:aws:secretsmanager:<region>:<account-id>:secret:greatkart/postgres-db" },
+        { "name": "POSTGRES_USER", "valueFrom": "arn:aws:secretsmanager:<region>:<account-id>:secret:greatkart/postgres-user" },
+        { "name": "POSTGRES_PASSWORD", "valueFrom": "arn:aws:secretsmanager:<region>:<account-id>:secret:greatkart/postgres-password" },
+        { "name": "POSTGRES_HOST", "valueFrom": "arn:aws:secretsmanager:<region>:<account-id>:secret:greatkart/postgres-host" },
+        { "name": "REDIS_URL", "valueFrom": "arn:aws:secretsmanager:<region>:<account-id>:secret:greatkart/redis-url" },
+        { "name": "CELERY_BROKER_URL", "valueFrom": "arn:aws:secretsmanager:<region>:<account-id>:secret:greatkart/celery-broker-url" },
+        { "name": "CELERY_RESULT_BACKEND", "valueFrom": "arn:aws:secretsmanager:<region>:<account-id>:secret:greatkart/celery-result-backend" }
+      ],
+      "logConfiguration": {
+        "logDriver": "awslogs",
+        "options": {
+          "awslogs-group": "/ecs/greatkart/beat",
+          "awslogs-region": "<region>",
+          "awslogs-stream-prefix": "ecs"
+        }
+      }
+    }
+  ]
+}

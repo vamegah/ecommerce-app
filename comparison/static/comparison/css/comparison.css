@@ -1,0 +1,126 @@
+.comparison-indicator {
+    align-items: center;
+    background: #fff;
+    border: 1px solid #d5dde7;
+    border-radius: 4px;
+    color: #3167eb;
+    cursor: pointer;
+    display: inline-flex;
+    font-weight: 600;
+    gap: 6px;
+    margin-left: 12px;
+    min-height: 40px;
+    padding: 8px 10px;
+}
+
+.comparison-indicator:hover {
+    border-color: #3167eb;
+}
+
+.comparison-indicator-full {
+    border-color: #fa3434;
+    color: #fa3434;
+}
+
+.comparison-feedback {
+    bottom: 24px;
+    left: 50%;
+    min-width: 260px;
+    position: fixed;
+    text-align: center;
+    transform: translateX(-50%);
+    z-index: 1060;
+}
+
+.comparison-feedback:not(:empty) {
+    background: #252f40;
+    border-radius: 4px;
+    color: #fff;
+    padding: 10px 14px;
+}
+
+.comparison-feedback-success:not(:empty) {
+    background: #14804a;
+}
+
+.comparison-feedback-warning:not(:empty) {
+    background: #b45f06;
+}
+
+.comparison-empty {
+    background: #f8fafc;
+    border: 1px solid #e3e8ef;
+    border-radius: 6px;
+    color: #516173;
+    padding: 32px;
+    text-align: center;
+}
+
+.comparison-actions {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 12px;
+}
+
+.comparison-table-wrap {
+    background: #fff;
+}
+
+.comparison-table th,
+.comparison-table td {
+    min-width: 180px;
+    vertical-align: middle;
+}
+
+.comparison-table thead th:first-child,
+.comparison-table tbody th {
+    min-width: 160px;
+}
+
+.comparison-product-image {
+    aspect-ratio: 1 / 1;
+    display: block;
+    margin: 0 auto 10px;
+    max-width: 110px;
+    object-fit: contain;
+    width: 100%;
+}
+
+.comparison-table thead th strong,
+.comparison-table thead th span {
+    display: block;
+    line-height: 1.35;
+    margin-bottom: 6px;
+}
+
+.comparison-best-value {
+    background: #e9f8ef;
+    color: #176a3a;
+    font-weight: 700;
+}
+
+.comparison-missing-value {
+    color: #8a94a6;
+}
+
+.comparison-product-unavailable {
+    opacity: 0.72;
+}
+
+.comparison-unavailable {
+    color: #fa3434;
+    font-size: 0.85rem;
+    font-weight: 700;
+}
+
+@media (max-width: 767px) {
+    .comparison-indicator {
+        margin-left: 8px;
+        padding: 8px;
+    }
+
+    .comparison-table th,
+    .comparison-table td {
+        min-width: 140px;
+    }
+}

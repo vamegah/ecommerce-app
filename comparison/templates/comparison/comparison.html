@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<section class="section-pagetop bg">
+    <div class="container">
+        <h2 class="title-page">Product Comparison</h2>
+    </div>
+</section>
+
+<section class="section-content padding-y">
+    <div class="container">
+        <div class="mb-3">
+            <a href="{% url 'store' %}" class="btn btn-outline-primary">
+                <i class="fa fa-arrow-left"></i> Continue Shopping
+            </a>
+        </div>
+
+        <div id="comparison-feedback" class="comparison-feedback" aria-live="polite"></div>
+        <div id="comparison-page"
+             data-share-id="{{ share_id }}"
+             data-max-products="{{ max_comparison_products }}"
+             data-api-url="{% url 'comparison:api_comparison' %}"
+             data-shared-api-url="{% url 'comparison:api_shared_comparison' %}"
+             data-shared-detail-url-template="{% url 'comparison:api_shared_detail' 'SHARE_ID' %}">
+            <div class="comparison-empty">Add products to compare side by side.</div>
+        </div>
+    </div>
+</section>
+{% endblock %}

@@ -1,0 +1,45 @@
+name: PR Preview Destroy
+
+on:
+  pull_request:
+    types: [closed]
+
+jobs:
+  destroy-preview:
+    runs-on: ubuntu-latest
+    environment: preview
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.8.5
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Generate preview tfvars
+        env:
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          AWS_REGION: ${{ secrets.AWS_REGION }}
+          PREVIEW_SECURITY_GROUP_ID: ${{ secrets.PREVIEW_SECURITY_GROUP_ID }}
+          PREVIEW_DB_PASSWORD: ${{ secrets.PREVIEW_DB_PASSWORD }}
+          PREVIEW_ZONE_ID: ${{ secrets.PREVIEW_ZONE_ID }}
+          PREVIEW_ALB_DNS_NAME: ${{ secrets.PREVIEW_ALB_DNS_NAME }}
+          PREVIEW_ALB_ZONE_ID: ${{ secrets.PREVIEW_ALB_ZONE_ID }}
+          PREVIEW_WEB_TASKDEF_ARN: ${{ secrets.PREVIEW_WEB_TASKDEF_ARN }}
+        run: bash infra/terraform/scripts/generate_preview_tfvars.sh
+
+      - name: Destroy preview infrastructure
+        env:
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          AWS_REGION: ${{ secrets.AWS_REGION }}
+          TF_STATE_BUCKET: ${{ secrets.TF_STATE_BUCKET }}
+          TF_LOCK_TABLE: ${{ secrets.TF_LOCK_TABLE }}
+        run: bash infra/terraform/scripts/preview_destroy.sh

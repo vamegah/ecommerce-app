@@ -1,0 +1,23 @@
+name: Synthetic Uptime Checks
+
+on:
+  schedule:
+    - cron: "*/10 * * * *"
+  workflow_dispatch:
+
+jobs:
+  check-staging:
+    runs-on: ubuntu-latest
+    environment: staging
+    if: ${{ secrets.STAGING_PUBLIC_URL != '' }}
+    steps:
+      - name: Check staging health endpoint
+        run: curl -fsS "${{ secrets.STAGING_PUBLIC_URL }}/healthz/"
+
+  check-production:
+    runs-on: ubuntu-latest
+    environment: production
+    if: ${{ secrets.PROD_PUBLIC_URL != '' }}
+    steps:
+      - name: Check production health endpoint
+        run: curl -fsS "${{ secrets.PROD_PUBLIC_URL }}/healthz/"

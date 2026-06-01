@@ -1,0 +1,29 @@
+{% if frequently_bought_together %}
+<section class="section-name padding-y-sm">
+    <header class="section-heading">
+        <h4 class="section-title">Frequently Bought Together</h4>
+    </header>
+    <div class="row">
+        {% for product in frequently_bought_together %}
+        <div class="col-md-3 mb-3">
+            <div class="card card-product-grid">
+                <a href="{{ product.get_slug_url }}" class="img-wrap recommendation-link"
+                   data-source-type="fbt"
+                   data-source-product-id="{{ single_product.id }}"
+                   data-recommended-product-id="{{ product.id }}">
+                    <img src="{{ product.images.url }}" alt="{{ product.product_name }}">
+                </a>
+                <figcaption class="info-wrap">
+                    <a href="{{ product.get_slug_url }}" class="title recommendation-link"
+                       data-source-type="fbt"
+                       data-source-product-id="{{ single_product.id }}"
+                       data-recommended-product-id="{{ product.id }}">{{ product.product_name }}</a>
+                    <div class="price mt-1">$ {{ product.price }}</div>
+                </figcaption>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    <div class="text-right"><strong>Combined Price: $ {{ fbt_combined_price }}</strong></div>
+</section>
+{% endif %}

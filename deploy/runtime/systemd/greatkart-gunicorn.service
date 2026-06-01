@@ -1,0 +1,30 @@
+[Unit]
+Description=GreatKart Gunicorn daemon
+After=network.target
+
+[Service]
+Type=simple
+User=greatkart
+Group=www-data
+WorkingDirectory=/opt/greatkart/current
+Environment=DJANGO_SETTINGS_MODULE=greatkartecommerce.settings
+Environment=DJANGO_CONFIGURATION=Prod
+EnvironmentFile=-/etc/greatkart/runtime-bootstrap.env
+EnvironmentFile=/run/greatkart/runtime.env
+RuntimeDirectory=gunicorn
+RuntimeDirectoryMode=0755
+ExecStartPre=/usr/bin/mkdir -p /run/greatkart
+ExecStartPre=/bin/bash /opt/greatkart/current/deploy/runtime/scripts/render_runtime_env_from_secretsmanager.sh /run/greatkart/runtime.env
+ExecStart=/opt/greatkart/venv/bin/gunicorn greatkartecommerce.wsgi:application -c /opt/greatkart/current/deploy/runtime/gunicorn/gunicorn.conf.py
+ExecReload=/bin/kill -s HUP $MAINPID
+KillSignal=SIGQUIT
+TimeoutStopSec=30
+PrivateTmp=true
+NoNewPrivileges=true
+ProtectSystem=full
+ProtectHome=true
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

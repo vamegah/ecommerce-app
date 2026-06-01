@@ -1,0 +1,103 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+      - master
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  django-tests:
+    name: Django Tests
+    runs-on: ubuntu-latest
+    environment: ci
+    env:
+      DJANGO_SETTINGS_MODULE: greatkartecommerce.settings
+      DJANGO_CONFIGURATION: Dev
+      SECRET_KEY: ${{ secrets.CI_SECRET_KEY }}
+      DEBUG: "True"
+      SILENCE_IMAGEFIELD_CHECKS: "1"
+      EMAIL_HOST_USER: ${{ secrets.CI_EMAIL_HOST_USER }}
+      EMAIL_HOST_PASSWORD: ${{ secrets.CI_EMAIL_HOST_PASSWORD }}
+      EMAIL_BACKEND: django.core.mail.backends.locmem.EmailBackend
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+          cache-dependency-path: requirements-ci.txt
+
+      - name: Install Python dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements-ci.txt
+
+      - name: Run Django system check
+        run: python manage.py check
+
+      - name: Run Django tests
+        run: python manage.py test filters coupons inventory_alerts addresses comparison recommendations wishlist orders
+
+  node-tests:
+    name: Node Tests (${{ matrix.package_dir }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        package_dir:
+          - addresses
+          - comparison
+          - filters
+          - inventory_alerts
+          - orders/tracking
+    defaults:
+      run:
+        working-directory: ${{ matrix.package_dir }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+
+      - name: Install Node dependencies
+        run: |
+          if [ -f package-lock.json ]; then
+            npm ci
+          else
+            npm install
+          fi
+
+      - name: Run Node tests
+        run: npm test
+
+      - name: Build package
+        run: npm run build --if-present
+
+  docker-build-smoke:
+    name: Docker Build Smoke
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build web image
+        run: docker build -f Dockerfile -t greatkart-web:test .
+
+      - name: Build worker image
+        run: docker build -f Dockerfile.worker -t greatkart-worker:test .

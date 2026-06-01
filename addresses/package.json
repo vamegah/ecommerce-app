@@ -1,0 +1,27 @@
+{
+  "name": "multi-address-management",
+  "version": "1.0.0",
+  "description": "Multi-address management system for e-commerce platform",
+  "main": "index.js",
+  "scripts": {
+    "test": "node run-vitest.js",
+    "test:watch": "node run-vitest.js --config vitest.config.js",
+    "test:coverage": "node run-vitest.js --coverage --config vitest.config.js",
+    "build": "tsc",
+    "type-check": "tsc --noEmit"
+  },
+  "keywords": [
+    "address",
+    "management",
+    "ecommerce"
+  ],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/node": "^20.11.0",
+    "@vitest/coverage-v8": "^1.2.0",
+    "fast-check": "^3.15.0",
+    "typescript": "^5.3.3",
+    "vitest": "^1.2.0"
+  }
+}

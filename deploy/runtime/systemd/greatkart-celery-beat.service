@@ -1,0 +1,24 @@
+[Unit]
+Description=GreatKart Celery Beat Scheduler
+After=network.target redis.service
+
+[Service]
+Type=simple
+User=greatkart
+Group=www-data
+WorkingDirectory=/opt/greatkart/current
+Environment=DJANGO_SETTINGS_MODULE=greatkartecommerce.settings
+Environment=DJANGO_CONFIGURATION=Prod
+EnvironmentFile=-/etc/greatkart/runtime-bootstrap.env
+EnvironmentFile=/run/greatkart/runtime.env
+ExecStartPre=/usr/bin/mkdir -p /run/greatkart
+ExecStartPre=/bin/bash /opt/greatkart/current/deploy/runtime/scripts/render_runtime_env_from_secretsmanager.sh /run/greatkart/runtime.env
+ExecStart=/opt/greatkart/venv/bin/celery -A greatkartecommerce beat --loglevel=INFO
+Restart=always
+RestartSec=5
+NoNewPrivileges=true
+ProtectSystem=full
+ProtectHome=true
+
+[Install]
+WantedBy=multi-user.target

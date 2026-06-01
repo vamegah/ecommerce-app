@@ -1,0 +1,19 @@
+name: Security - DAST ZAP Baseline
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "15 5 * * 1"
+
+jobs:
+  zap-baseline:
+    runs-on: ubuntu-latest
+    environment: staging
+    if: ${{ secrets.STAGING_PUBLIC_URL != '' }}
+    steps:
+      - name: ZAP Baseline Scan
+        uses: zaproxy/action-baseline@v0.12.0
+        with:
+          target: ${{ secrets.STAGING_PUBLIC_URL }}
+          rules_file_name: ".zap/rules.tsv"
+          cmd_options: "-a"

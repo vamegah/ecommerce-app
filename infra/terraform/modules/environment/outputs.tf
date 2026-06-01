@@ -1,0 +1,10 @@
+output "vpc_id" { value = module.networking.vpc_id }
+output "private_subnet_ids" { value = module.networking.private_subnet_ids }
+output "cluster_name" { value = module.compute.cluster_name }
+output "db_endpoint" { value = module.database.endpoint }
+output "redis_endpoint" { value = module.cache.primary_endpoint }
+output "media_bucket" { value = var.media_bucket_name }
+output "certificate_arn" { value = module.tls.certificate_arn }
+output "ecs_task_role_arn" { value = module.iam.ecs_task_role_arn }
+output "cdn_domain_name" { value = module.cdn.distribution_domain_name }
+output "waf_web_acl_arn" { value = module.waf.web_acl_arn }

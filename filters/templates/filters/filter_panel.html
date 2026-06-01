@@ -1,0 +1,49 @@
+{% load static %}
+
+<link rel="stylesheet" href="{% static 'css/filters.css' %}">
+
+<div id="filter-panel"></div>
+
+<script type="module">
+    import FilterSystem from '{% static "js/filters/dist/FilterSystem.js" %}';
+
+    // Initialize filter system
+    const filterSystem = new FilterSystem((filteredProducts) => {
+        // Update product display
+        displayProducts(filteredProducts);
+    });
+
+    // Fetch initial products
+    async function loadProducts() {
+        try {
+            const response = await fetch('/filters/api/products/');
+            const data = await response.json();
+            filterSystem.setProducts(data.products);
+        } catch (error) {
+            console.error('Failed to load products:', error);
+        }
+    }
+
+    function displayProducts(products) {
+        const container = document.getElementById('products-container');
+        if (!container) return;
+
+        if (products.length === 0) {
+            container.innerHTML = '<p>No products found matching your filters.</p>';
+            return;
+        }
+
+        container.innerHTML = products.map(product => `
+            <div class="product-card">
+                <img src="${product.image}" alt="${product.name}">
+                <h3>${product.name}</h3>
+                <p class="price">$${product.price}</p>
+                <p class="rating">Rating: ${product.rating === null ? 'Not rated' : `${product.rating}/5`}</p>
+                <p class="stock">${product.inventoryCount > 0 ? 'In Stock' : 'Out of Stock'}</p>
+            </div>
+        `).join('');
+    }
+
+    // Load products on page load
+    loadProducts();
+</script>

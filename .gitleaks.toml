@@ -1,0 +1,10 @@
+title = "GreatKart Gitleaks Config"
+
+[allowlist]
+description = "Allow sample placeholders"
+regexes = [
+  '''example\.com''',
+  '''replace-me''',
+  '''ci-secret-key''',
+  '''cd-secret-key'''
+]

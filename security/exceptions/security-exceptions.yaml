@@ -1,0 +1,11 @@
+version: 1
+exceptions:
+  - id: SEC-EXAMPLE-001
+    scanner: trivy
+    rule_or_cve: CVE-0000-0000
+    scope: "temporary example"
+    justification: "Documented sample exception. Replace with approved risk acceptance."
+    approved_by: "security-team@example.com"
+    created_on: "2026-05-31"
+    expires_on: "2026-06-30"
+    status: "active"

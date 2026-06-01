@@ -1,0 +1,316 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+
+
+<section class="section-content padding-y bg">
+    <div class="container">
+
+        <!-- ============================ COMPONENT 1 ================================= -->
+
+        <div class="row">
+            <aside class="col-lg-6">
+                <div class="card">
+                    <div class="card-body">
+                        <h4 class="card-title mb-4">Billing Address</h4>
+                        <form action="{% url 'place_order' %}" method="POST">
+                            {% csrf_token %}
+                            {% if address_selection.addresses %}
+                            <div class="form-group">
+                                <label>Saved Addresses</label>
+                                {% for address in address_selection.addresses %}
+                                <div class="custom-control custom-radio mb-2">
+                                    <input type="radio" id="saved-address-{{ address.id }}" name="selected_address_id"
+                                        class="custom-control-input saved-address-option"
+                                        value="{{ address.id }}"
+                                        data-street="{{ address.street }}"
+                                        data-apartment="{{ address.apartment }}"
+                                        data-city="{{ address.city }}"
+                                        data-state="{{ address.state }}"
+                                        data-postal-code="{{ address.postal_code }}"
+                                        data-country="{{ address.country }}"
+                                        data-phone="{{ address.phone_number }}"
+                                        {% if address.id|stringformat:"s" == address_selection.defaultAddressId %}checked{% endif %}>
+                                    <label class="custom-control-label" for="saved-address-{{ address.id }}">
+                                        {{ address.street }}, {{ address.city }}, {{ address.postal_code }}
+                                        {% if address.is_default %}<span class="badge badge-primary">Default</span>{% endif %}
+                                    </label>
+                                </div>
+                                {% endfor %}
+                                <div class="custom-control custom-radio mb-3">
+                                    <input type="radio" id="saved-address-new" name="selected_address_id" class="custom-control-input" value="">
+                                    <label class="custom-control-label" for="saved-address-new">Use a new address</label>
+                                </div>
+                            </div>
+                            {% endif %}
+                            <div class="form-row">
+                                <div class="col form-group">
+                                    <label for="">First Name</label>
+                                    <input type="text" name="first_name" class="form-control" required>
+                                </div>
+                                <div class="col form-group">
+                                    <label for="">Last Name</label>
+                                    <input type="text" name="last_name" class="form-control" required>
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="col form-group">
+                                    <label for="">Email</label>
+                                    <input type="email" name="email" class="form-control" required>
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="col form-group">
+                                    <label for="">Address Line 1</label>
+                                    <input type="text" name="address_line_1" id="checkout-address-line-1" class="form-control" required>
+                                </div>
+                                <div class="col form-group">
+                                    <label for="">Address Line 2</label>
+                                    <input type="text" name="address_line_2" id="checkout-address-line-2" class="form-control">
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="col form-group">
+                                    <label for="">Zip Code</label>
+                                    <input type="text" name="zip_code" id="checkout-zip-code" class="form-control" required>
+                                </div>
+                                <div class="col form-group">
+                                    <label for="">State</label>
+                                    <input type="text" name="state" id="checkout-state" class="form-control" required>
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="col form-group">
+                                    <label for="">City</label>
+                                    <input type="text" name="city" id="checkout-city" class="form-control" required>
+                                </div>
+                                <div class="col form-group">
+                                    <label for="">Country</label>
+                                    <input type="text" name="country" id="checkout-country" class="form-control" required>
+                                  </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="col form-group">
+                                    <label for="">Phone Number</label>
+                                    <input type="text" name="phone" id="checkout-phone" class="form-control" required>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="custom-control custom-checkbox">
+                                    <input type="checkbox" name="save_checkout_address" class="custom-control-input" value="1">
+                                    <span class="custom-control-label">Save this address for future orders</span>
+                                </label>
+                            </div>
+                            <div class="form-row">
+                                <button type="submit" name="submit" class="btn btn-danger btn-block">Save &
+                                    Continue</button>
+                                </div>
+
+
+                    </div>
+                </div> <!-- card.// -->
+
+            </aside> <!-- col.// -->
+            <aside class="col-lg-6">
+
+                <div class="card">
+                    <div class="card-body">
+                        <table class="table table-borderless table-shopping-cart">
+                            <thead class="text-muted">
+                                <tr class="small text-uppercase">
+                                    <th scope="col">Product</th>
+                                    <th scope="col" width="120">Quantity</th>
+                                    <th scope="col" width="120">Price</th>
+
+                                </tr>
+                            </thead>
+                            <tbody>
+
+                                {% for cart_item in cart_items %}
+                                <tr>
+                                    <td>
+                                        <figure class="itemside align-items-center">
+                                            <div class="aside"><img src="{{ cart_item.product.images.url }}"
+                                                    class="img-sm"></div>
+                                            <figcaption class="info">
+                                                <a href="{{ cart_item.product.get_url }}" class="title text-dark">{{ cart_item.product.product_name }}</a>
+                                                <p class="text-muted small">
+                                                    {% if cart_item.variations.all %}
+                                                    {% for item in cart_item.variations.all %}
+                                                    {{ item.variation_category | capfirst }} : {{ item.variation_value | capfirst }} <br>
+                                                     {% endfor %}
+                                                    {% endif %}
+                                                </p>
+                                            </figcaption>
+                                        </figure>
+                                    </td>
+                                    <td>
+                                        <!-- col.// -->
+                                        <label for="">{{cart_item.quantity}}</label>
+                                    </td>
+                                    <td>
+                                        <div class="price-wrap">
+                                            <var class="price">$ {{ cart_item.sub_total }}</var>
+                                            <small class="text-muted"> $ {{ cart_item.product.price }} each </small>
+                                        </div> <!-- price-wrap .// -->
+                                    </td>
+
+                                </tr>
+                                {% endfor %}
+
+                            </tbody>
+                        </table>
+
+                        <div class="card mt-3">
+                            <div class="card-body">
+                                <h5>Have a coupon?</h5>
+                                <div class="input-group">
+                                    <input type="text" id="coupon-code" class="form-control" placeholder="Enter coupon code">
+                                    <div class="input-group-append">
+                                        <button type="button" class="btn btn-primary" id="apply-coupon">Apply</button>
+                                    </div>
+                                </div>
+                                <div id="coupon-error" class="text-danger mt-2" style="display:none;"></div>
+                                <div id="coupon-success" class="text-success mt-2" style="display:none;"></div>
+                            </div>
+                        </div>
+
+                        <div class="card mt-3">
+                            <div class="card-body">
+                                <dl class="dlist-align">
+                                    <dt>Subtotal:</dt>
+                                    <dd class="text-right">$<span id="summary-subtotal">{{ total }}</span></dd>
+                                </dl>
+                                <dl class="dlist-align" id="discount-row" {% if not applied_coupon and not request.session.coupon_code %}style="display:none;"{% endif %}>
+                                    <dt>Discount (<span id="summary-coupon-code">{% if applied_coupon %}{{ applied_coupon.code }}{% else %}{{ request.session.coupon_code }}{% endif %}</span>):
+                                        <button type="button" class="btn btn-sm btn-link" id="remove-coupon">Remove</button>
+                                    </dt>
+                                    <dd class="text-right text-success">-$<span id="summary-discount">{{ discount_amount|default:"0.00" }}</span></dd>
+                                </dl>
+                                <dl class="dlist-align">
+                                    <dt>Tax:</dt>
+                                    <dd class="text-right">$<span id="summary-tax">{{ tax }}</span></dd>
+                                </dl>
+                                <dl class="dlist-align">
+                                    <dt>Grand Total:</dt>
+                                    <dd class="text-right h5"><strong>$<span id="summary-grand-total">{{ grand_total }}</span></strong></dd>
+                                </dl>
+                            </div>
+                        </div>
+
+                        <button type="submit" name="submit" class="btn btn-primary btn-block">Place Order</button>
+                        <a href="{% url 'store' %}" class="btn btn-light btn-block">Continue Shopping</a>
+                        </form>
+                    </div> <!-- card-body.// -->
+                </div> <!-- card.// -->
+
+<script>
+document.getElementById('apply-coupon').addEventListener('click', function() {
+    const code = document.getElementById('coupon-code').value;
+    const errorDiv = document.getElementById('coupon-error');
+    const successDiv = document.getElementById('coupon-success');
+    
+    fetch('{% url "apply_coupon" %}', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'X-CSRFToken': '{{ csrf_token }}'
+        },
+        body: 'code=' + encodeURIComponent(code)
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            updateCouponSummary(data);
+            successDiv.textContent = 'Coupon applied! Discount: $' + data.discount;
+            successDiv.style.display = 'block';
+            errorDiv.style.display = 'none';
+        } else {
+            errorDiv.textContent = data.error;
+            errorDiv.style.display = 'block';
+            successDiv.style.display = 'none';
+        }
+    });
+});
+
+const removeBtn = document.getElementById('remove-coupon');
+if (removeBtn) {
+    removeBtn.addEventListener('click', function(e) {
+        e.preventDefault();
+        fetch('{% url "remove_coupon" %}', {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': '{{ csrf_token }}'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            updateCouponSummary(data);
+            const successDiv = document.getElementById('coupon-success');
+            successDiv.textContent = 'Coupon removed.';
+            successDiv.style.display = 'block';
+        });
+    });
+}
+
+function updateCouponSummary(data) {
+    document.getElementById('summary-subtotal').textContent = data.subtotal;
+    document.getElementById('summary-tax').textContent = data.tax;
+    document.getElementById('summary-grand-total').textContent = data.grand_total;
+
+    const discountRow = document.getElementById('discount-row');
+    if (data.success && data.code) {
+        document.getElementById('summary-coupon-code').textContent = data.code;
+        document.getElementById('summary-discount').textContent = data.discount;
+        discountRow.style.display = '';
+    } else {
+        document.getElementById('summary-coupon-code').textContent = '';
+        document.getElementById('summary-discount').textContent = '0.00';
+        discountRow.style.display = 'none';
+    }
+}
+
+function fillCheckoutAddress(option) {
+    if (!option || !option.dataset) {
+        return;
+    }
+    document.getElementById('checkout-address-line-1').value = option.dataset.street || '';
+    document.getElementById('checkout-address-line-2').value = option.dataset.apartment || '';
+    document.getElementById('checkout-city').value = option.dataset.city || '';
+    document.getElementById('checkout-state').value = option.dataset.state || '';
+    document.getElementById('checkout-zip-code').value = option.dataset.postalCode || '';
+    document.getElementById('checkout-country').value = option.dataset.country || '';
+    if (option.dataset.phone) {
+        document.getElementById('checkout-phone').value = option.dataset.phone;
+    }
+}
+
+document.querySelectorAll('.saved-address-option').forEach(function(option) {
+    option.addEventListener('change', function() {
+        if (option.checked) {
+            fillCheckoutAddress(option);
+        }
+    });
+});
+
+const selectedSavedAddress = document.querySelector('.saved-address-option:checked');
+if (selectedSavedAddress) {
+    fillCheckoutAddress(selectedSavedAddress);
+}
+</script>
+
+
+            </aside> <!-- col.// -->
+
+
+        </div> <!-- row.// -->
+
+        <!-- ============================ COMPONENT 1 END .// ================================= -->
+        {% include 'recommendations/cart_recommendations.html' with cart_recommendations=checkout_recommendations %}
+
+    </div> <!-- container .//  -->
+</section>
+<!-- ========================= SECTION CONTENT END// ========================= -->
+
+{% endblock %}
