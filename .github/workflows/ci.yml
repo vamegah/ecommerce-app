@@ -34,15 +34,15 @@ jobs:
     name: Django Tests
     runs-on: ubuntu-latest
     if: github.actor != 'dependabot[bot]'
-    environment: ci
     env:
       DJANGO_SETTINGS_MODULE: greatkartecommerce.settings
       DJANGO_CONFIGURATION: Dev
-      SECRET_KEY: ${{ secrets.CI_SECRET_KEY }}
+      SECRET_KEY: django-ci-insecure-test-key
       DEBUG: "True"
+      ALLOWED_HOSTS: localhost,127.0.0.1,testserver
       SILENCE_IMAGEFIELD_CHECKS: "1"
-      EMAIL_HOST_USER: ${{ secrets.CI_EMAIL_HOST_USER }}
-      EMAIL_HOST_PASSWORD: ${{ secrets.CI_EMAIL_HOST_PASSWORD }}
+      EMAIL_HOST_USER: ci@example.com
+      EMAIL_HOST_PASSWORD: ci-password
       EMAIL_BACKEND: django.core.mail.backends.locmem.EmailBackend
     steps:
       - name: Checkout
