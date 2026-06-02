@@ -1,4 +1,4 @@
-Django==5.1.7
+Django==6.0.5
 django-configurations==2.5.1
 python-decouple==3.8
 Pillow==12.2.0
