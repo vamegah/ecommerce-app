@@ -55,7 +55,7 @@ class Dev(Configuration):
             'inventory_alerts',
             'addresses',
             'comparison',
-            'admin_honeypot',
+            'admin_honeypot.apps.AdminHoneypotConfig',
         ]
 
         MIDDLEWARE = [
