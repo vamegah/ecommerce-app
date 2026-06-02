@@ -5,6 +5,16 @@ on:
   pull_request:
     types: [closed]
     branches: [main, master]
+    paths:
+      - "**/*.py"
+      - "templates/**"
+      - "greatkart/static/**"
+      - "requirements-ci.txt"
+      - "Dockerfile"
+      - "Dockerfile.worker"
+      - "deploy/**"
+      - "infra/terraform/**"
+      - ".github/workflows/preview-environment.yml"
 
 jobs:
   destroy-preview:

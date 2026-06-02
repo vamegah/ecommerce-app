@@ -4,40 +4,61 @@ updates:
     directory: "/"
     schedule:
       interval: "weekly"
-    open-pull-requests-limit: 10
+    open-pull-requests-limit: 5
+    groups:
+      python-deps:
+        patterns: ["*"]
 
   - package-ecosystem: "npm"
     directory: "/addresses"
     schedule:
       interval: "weekly"
-    open-pull-requests-limit: 10
+    open-pull-requests-limit: 3
+    groups:
+      addresses-deps:
+        patterns: ["*"]
 
   - package-ecosystem: "npm"
     directory: "/comparison"
     schedule:
       interval: "weekly"
-    open-pull-requests-limit: 10
+    open-pull-requests-limit: 3
+    groups:
+      comparison-deps:
+        patterns: ["*"]
 
   - package-ecosystem: "npm"
     directory: "/filters"
     schedule:
       interval: "weekly"
-    open-pull-requests-limit: 10
+    open-pull-requests-limit: 3
+    groups:
+      filters-deps:
+        patterns: ["*"]
 
   - package-ecosystem: "npm"
     directory: "/inventory_alerts"
     schedule:
       interval: "weekly"
-    open-pull-requests-limit: 10
+    open-pull-requests-limit: 3
+    groups:
+      inventory-alerts-deps:
+        patterns: ["*"]
 
   - package-ecosystem: "npm"
     directory: "/orders/tracking"
     schedule:
       interval: "weekly"
-    open-pull-requests-limit: 10
+    open-pull-requests-limit: 3
+    groups:
+      orders-tracking-deps:
+        patterns: ["*"]
 
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
       interval: "weekly"
-    open-pull-requests-limit: 10
+    open-pull-requests-limit: 5
+    groups:
+      github-actions:
+        patterns: ["*"]

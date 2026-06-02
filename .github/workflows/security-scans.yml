@@ -27,6 +27,7 @@ concurrency:
 jobs:
   dependency-audit:
     runs-on: ubuntu-latest
+    if: github.actor != 'dependabot[bot]'
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -49,23 +50,23 @@ jobs:
 
       - name: NPM audit (addresses)
         working-directory: addresses
-        run: npm audit --audit-level=high --json > ../npm-audit-addresses.json
+        run: npm audit --audit-level=high --json | tee ../npm-audit-addresses.json
 
       - name: NPM audit (comparison)
         working-directory: comparison
-        run: npm audit --audit-level=high --json > ../npm-audit-comparison.json
+        run: npm audit --audit-level=high --json | tee ../npm-audit-comparison.json
 
       - name: NPM audit (filters)
         working-directory: filters
-        run: npm audit --audit-level=high --json > ../npm-audit-filters.json
+        run: npm audit --audit-level=high --json | tee ../npm-audit-filters.json
 
       - name: NPM audit (inventory_alerts)
         working-directory: inventory_alerts
-        run: npm audit --audit-level=high --json > ../npm-audit-inventory-alerts.json
+        run: npm audit --audit-level=high --json | tee ../npm-audit-inventory-alerts.json
 
       - name: NPM audit (orders/tracking)
         working-directory: orders/tracking
-        run: npm audit --audit-level=high --json > ../../npm-audit-orders-tracking.json
+        run: npm audit --audit-level=high --json | tee ../../npm-audit-orders-tracking.json
 
       - name: Upload dependency audit artifacts
         uses: actions/upload-artifact@v4
@@ -77,18 +78,39 @@ jobs:
 
   trivy-container-scan:
     runs-on: ubuntu-latest
+    if: github.actor != 'dependabot[bot]'
+    permissions:
+      contents: read
+      security-events: write
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
       - name: Build web image
-        run: docker build -f Dockerfile -t greatkart-web:scan .
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ./Dockerfile
+          push: false
+          tags: greatkart-web:scan
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
 
       - name: Build worker image
-        run: docker build -f Dockerfile.worker -t greatkart-worker:scan .
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ./Dockerfile.worker
+          push: false
+          tags: greatkart-worker:scan
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
 
       - name: Trivy web image scan
-        uses: aquasecurity/trivy-action@0.24.0
+        uses: aquasecurity/trivy-action@18f2510ee396bbf400402947b394f2dd8c87dbb0 # v0.24.0
         with:
           image-ref: greatkart-web:scan
           format: sarif
@@ -97,7 +119,7 @@ jobs:
           ignore-unfixed: true
 
       - name: Trivy worker image scan
-        uses: aquasecurity/trivy-action@0.24.0
+        uses: aquasecurity/trivy-action@18f2510ee396bbf400402947b394f2dd8c87dbb0 # v0.24.0
         with:
           image-ref: greatkart-worker:scan
           format: sarif
@@ -105,13 +127,43 @@ jobs:
           severity: CRITICAL,HIGH
           ignore-unfixed: true
 
-      - name: Upload Trivy reports
+      - name: Upload Trivy web SARIF to GitHub Security
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: trivy-web.sarif
+          category: trivy-web
+
+      - name: Upload Trivy worker SARIF to GitHub Security
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: trivy-worker.sarif
+          category: trivy-worker
+
+      - name: Upload Trivy reports as artifacts
         uses: actions/upload-artifact@v4
         with:
           name: trivy-reports
           path: |
             trivy-web.sarif
             trivy-worker.sarif
+
+  security-gate:
+    runs-on: ubuntu-latest
+    needs: [dependency-audit, trivy-container-scan]
+    if: always() && !contains(needs.*.result, 'failure') && github.actor != 'dependabot[bot]'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Download dependency audit artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: dependency-audits
+
+      - name: Download Trivy reports
+        uses: actions/download-artifact@v4
+        with:
+          name: trivy-reports
 
       - name: Setup Python for security gates
         uses: actions/setup-python@v5
@@ -126,6 +178,7 @@ jobs:
 
   secret-scan:
     runs-on: ubuntu-latest
+    if: github.actor != 'dependabot[bot]'
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -138,6 +191,7 @@ jobs:
 
   iac-scan:
     runs-on: ubuntu-latest
+    if: github.actor != 'dependabot[bot]'
     steps:
       - name: Checkout
         uses: actions/checkout@v4

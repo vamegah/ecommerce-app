@@ -27,12 +27,13 @@ on:
 
 concurrency:
   group: ci-${{ github.ref }}
-  cancel-in-progress: true
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
   django-tests:
     name: Django Tests
     runs-on: ubuntu-latest
+    if: github.actor != 'dependabot[bot]' || contains(github.event.pull_request.title, 'requirements')
     environment: ci
     env:
       DJANGO_SETTINGS_MODULE: greatkartecommerce.settings
@@ -103,7 +104,6 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: "20"
-          cache: "npm"
 
       - name: Install Node dependencies
         run: |
@@ -122,6 +122,7 @@ jobs:
   docker-build-smoke:
     name: Docker Build Smoke
     runs-on: ubuntu-latest
+    if: github.actor != 'dependabot[bot]' || contains(github.event.pull_request.title, 'Dockerfile')
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -130,7 +131,21 @@ jobs:
         uses: docker/setup-buildx-action@v3
 
       - name: Build web image
-        run: docker build -f Dockerfile -t greatkart-web:test .
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ./Dockerfile
+          push: false
+          tags: greatkart-web:test
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
 
       - name: Build worker image
-        run: docker build -f Dockerfile.worker -t greatkart-worker:test .
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ./Dockerfile.worker
+          push: false
+          tags: greatkart-worker:test
+          cache-from: type=gha
+          cache-to: type=gha,mode=max

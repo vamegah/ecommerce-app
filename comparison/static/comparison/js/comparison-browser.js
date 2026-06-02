@@ -63,13 +63,44 @@
         localStorage.setItem(STORAGE_KEY, JSON.stringify(comparison));
     }
 
+    var ALLOWED_API_PREFIXES = [
+        '/comparison/api/'
+    ];
+
+    function isSameOrigin(url) {
+        try {
+            return new URL(url, window.location.origin).origin === window.location.origin;
+        } catch (e) {
+            return false;
+        }
+    }
+
+    function isAllowedUrl(url) {
+        if (!isSameOrigin(url)) {
+            return false;
+        }
+        var pathname = new URL(url, window.location.origin).pathname;
+        return ALLOWED_API_PREFIXES.some(function (prefix) {
+            return pathname === prefix || pathname.startsWith(prefix);
+        });
+    }
+
     function requestJson(url, options) {
+        var canonical;
+        try {
+            canonical = new URL(url, window.location.origin).href;
+        } catch (e) {
+            return Promise.reject(new Error('Request blocked: invalid URL.'));
+        }
+        if (!isAllowedUrl(canonical)) {
+            return Promise.reject(new Error('Request blocked: URL not in permitted API paths.'));
+        }
         var requestOptions = options || {};
         requestOptions.headers = Object.assign({
             'Content-Type': 'application/json',
             'X-CSRFToken': getCookie('csrftoken') || ''
         }, requestOptions.headers || {});
-        return fetch(url, requestOptions).then(function (response) {
+        return fetch(canonical, requestOptions).then(function (response) {
             return response.json().catch(function () {
                 return {};
             }).then(function (payload) {
@@ -278,25 +309,90 @@
         comparison = normalizeComparison(comparison || loadLocal());
         updateIndicator(comparison.products.length);
 
+        while (page.firstChild) {
+            page.removeChild(page.firstChild);
+        }
+
         if (comparison.products.length === 0) {
-            page.innerHTML = '<div class="comparison-empty">Add products to compare side by side.</div>';
+            var empty = document.createElement('div');
+            empty.className = 'comparison-empty';
+            empty.textContent = 'Add products to compare side by side.';
+            page.appendChild(empty);
             return;
         }
 
         var attributes = collectAttributes(comparison.products);
-        var productHeaders = comparison.products.map(function (product) {
-            return '<th scope="col" class="' + (product.available ? '' : 'comparison-product-unavailable') + '">' +
-                '<img class="comparison-product-image" src="' + escapeHtml(product.imageUrl) + '" alt="' + escapeHtml(product.name) + '">' +
-                '<strong>' + escapeHtml(product.name) + '</strong>' +
-                '<span>$' + Number(product.price).toFixed(2) + '</span>' +
-                (product.available ? '' : '<span class="comparison-unavailable">Unavailable</span>') +
-                '<button type="button" class="btn btn-sm btn-outline-danger" data-compare-remove="' + escapeHtml(product.id) + '">Remove</button>' +
-                '</th>';
-        }).join('');
-        var rows = attributes.map(function (attribute) {
+
+        var actionsDiv = document.createElement('div');
+        actionsDiv.className = 'comparison-actions';
+        var shareBtn = document.createElement('button');
+        shareBtn.type = 'button';
+        shareBtn.className = 'btn btn-primary';
+        shareBtn.dataset.compareShare = '';
+        var shareIcon = document.createElement('i');
+        shareIcon.className = 'fa fa-share-alt';
+        shareBtn.appendChild(shareIcon);
+        shareBtn.appendChild(document.createTextNode(' Share'));
+        actionsDiv.appendChild(shareBtn);
+        page.appendChild(actionsDiv);
+
+        var tableWrap = document.createElement('div');
+        tableWrap.className = 'table-responsive comparison-table-wrap';
+        var table = document.createElement('table');
+        table.className = 'table table-bordered comparison-table';
+
+        var thead = document.createElement('thead');
+        var headerRow = document.createElement('tr');
+        var attrHeader = document.createElement('th');
+        attrHeader.scope = 'col';
+        attrHeader.textContent = 'Attribute';
+        headerRow.appendChild(attrHeader);
+
+        comparison.products.forEach(function (product) {
+            var th = document.createElement('th');
+            th.scope = 'col';
+            if (!product.available) {
+                th.className = 'comparison-product-unavailable';
+            }
+            var img = document.createElement('img');
+            img.className = 'comparison-product-image';
+            img.src = product.imageUrl;
+            img.alt = product.name;
+            th.appendChild(img);
+            var strong = document.createElement('strong');
+            strong.textContent = product.name;
+            th.appendChild(strong);
+            var priceSpan = document.createElement('span');
+            priceSpan.textContent = '$' + Number(product.price).toFixed(2);
+            th.appendChild(priceSpan);
+            if (!product.available) {
+                var unavailSpan = document.createElement('span');
+                unavailSpan.className = 'comparison-unavailable';
+                unavailSpan.textContent = 'Unavailable';
+                th.appendChild(unavailSpan);
+            }
+            var removeBtn = document.createElement('button');
+            removeBtn.type = 'button';
+            removeBtn.className = 'btn btn-sm btn-outline-danger';
+            removeBtn.dataset.compareRemove = product.id;
+            removeBtn.textContent = 'Remove';
+            th.appendChild(removeBtn);
+            headerRow.appendChild(th);
+        });
+        thead.appendChild(headerRow);
+        table.appendChild(thead);
+
+        var tbody = document.createElement('tbody');
+        attributes.forEach(function (attribute) {
             var bestIds = bestProductIds(comparison.products, attribute.name);
-            var cells = comparison.products.map(function (product) {
+            var tr = document.createElement('tr');
+            var rowHeader = document.createElement('th');
+            rowHeader.scope = 'row';
+            rowHeader.textContent = attribute.name;
+            tr.appendChild(rowHeader);
+            comparison.products.forEach(function (product) {
                 var value = attributeValue(product, attribute.name);
+                var td = document.createElement('td');
                 var classes = [];
                 if (!value) {
                     classes.push('comparison-missing-value');
@@ -304,21 +400,17 @@
                 if (bestIds[product.id]) {
                     classes.push('comparison-best-value');
                 }
-                return '<td class="' + classes.join(' ') + '">' + escapeHtml(formatValue(value)) + '</td>';
-            }).join('');
-            return '<tr><th scope="row">' + escapeHtml(attribute.name) + '</th>' + cells + '</tr>';
-        }).join('');
-
-        page.innerHTML =
-            '<div class="comparison-actions">' +
-                '<button type="button" class="btn btn-primary" data-compare-share><i class="fa fa-share-alt"></i> Share</button>' +
-            '</div>' +
-            '<div class="table-responsive comparison-table-wrap">' +
-                '<table class="table table-bordered comparison-table">' +
-                    '<thead><tr><th scope="col">Attribute</th>' + productHeaders + '</tr></thead>' +
-                    '<tbody>' + rows + '</tbody>' +
-                '</table>' +
-            '</div>';
+                if (classes.length) {
+                    td.className = classes.join(' ');
+                }
+                td.textContent = formatValue(value);
+                tr.appendChild(td);
+            });
+            tbody.appendChild(tr);
+        });
+        table.appendChild(tbody);
+        tableWrap.appendChild(table);
+        page.appendChild(tableWrap);
     }
 
     function shareComparison() {
@@ -377,7 +469,11 @@
                 var comparison = normalizeComparison(payload.comparison);
                 renderComparisonPage(comparison);
             }).catch(function (error) {
-                page.innerHTML = '<div class="alert alert-warning">' + escapeHtml(error.message || 'Shared comparison unavailable.') + '</div>';
+                var alert = document.createElement('div');
+                alert.className = 'alert alert-warning';
+                alert.textContent = error.message || 'Shared comparison unavailable.';
+                while (page.firstChild) { page.removeChild(page.firstChild); }
+                page.appendChild(alert);
             });
         }
 

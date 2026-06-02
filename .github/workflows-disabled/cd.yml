@@ -32,7 +32,7 @@ jobs:
       - name: Collect static files
         env:
           DJANGO_SETTINGS_MODULE: greatkartecommerce.settings
-          DJANGO_CONFIGURATION: Dev
+          DJANGO_CONFIGURATION: Production
           SECRET_KEY: ${{ secrets.CD_SECRET_KEY }}
           DEBUG: "False"
           SILENCE_IMAGEFIELD_CHECKS: "1"
@@ -42,7 +42,7 @@ jobs:
 
       - name: Archive application
         run: |
-          tar --exclude=".git" --exclude="env" --exclude="**/node_modules" -czf greatkart-app.tar.gz .
+          tar --exclude=".git" --exclude="env" --exclude="**/node_modules" --exclude=".env" --exclude=".env.*" -czf greatkart-app.tar.gz .
 
       - name: Upload deploy artifact
         uses: actions/upload-artifact@v4
@@ -91,7 +91,7 @@ jobs:
   deploy-production:
     name: Deploy to Production
     needs: [build-artifact, deploy-staging]
-    if: ${{ secrets.PROD_DEPLOY_HOST != '' && secrets.PROD_DEPLOY_USER != '' && secrets.PROD_DEPLOY_KEY != '' && secrets.PROD_DEPLOY_PATH != '' }}
+    if: ${{ needs.deploy-staging.result == 'success' && secrets.PROD_DEPLOY_HOST != '' && secrets.PROD_DEPLOY_USER != '' && secrets.PROD_DEPLOY_KEY != '' && secrets.PROD_DEPLOY_PATH != '' }}
     runs-on: ubuntu-latest
     environment: production
     steps:

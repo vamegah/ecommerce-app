@@ -1,4 +1,5 @@
 import json
+import uuid
 
 from django.contrib.auth import get_user_model
 from django.test import Client, TestCase
@@ -18,7 +19,7 @@ class AddressTestCase(TestCase):
             last_name="Lovelace",
             username="ada-addresses",
             email="ada-addresses@example.com",
-            password="secret",
+            password=uuid.uuid4().hex,
         )
         self.user.is_active = True
         self.user.save(update_fields=["is_active"])
@@ -28,7 +29,7 @@ class AddressTestCase(TestCase):
             last_name="Hopper",
             username="grace-addresses",
             email="grace-addresses@example.com",
-            password="secret",
+            password=uuid.uuid4().hex,
         )
         self.other_user.is_active = True
         self.other_user.save(update_fields=["is_active"])

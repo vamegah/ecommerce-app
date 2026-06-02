@@ -29,7 +29,7 @@ jobs:
       fail-fast: false
       matrix:
         env_name: [dev, staging, prod]
-    if: ${{ github.event_name == 'pull_request' || matrix.env_name == inputs.target_env }}
+    if: ${{ github.event_name == 'pull_request' && matrix.env_name != 'prod' || github.event_name == 'workflow_dispatch' && matrix.env_name == inputs.target_env }}
     environment: terraform-${{ matrix.env_name }}
     permissions:
       id-token: write
