@@ -1,4 +1,5 @@
 name: Security - DAST ZAP Baseline
+run-name: DAST ZAP - ${{ github.ref_name }} by ${{ github.actor }}
 
 on:
   workflow_dispatch:

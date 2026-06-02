@@ -1,8 +1,10 @@
 name: PR Preview Destroy
+run-name: "PR preview destroy - #${{ github.event.pull_request.number }} by ${{ github.actor }}"
 
 on:
   pull_request:
     types: [closed]
+    branches: [main, master]
 
 jobs:
   destroy-preview:

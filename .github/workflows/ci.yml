@@ -1,11 +1,29 @@
 name: CI
+run-name: CI - ${{ github.ref_name }} by ${{ github.actor }}
 
 on:
   pull_request:
+    branches:
+      - main
+      - master
+    paths-ignore:
+      - "docs/**"
+      - ".kiro/**"
+      - ".zap/**"
+      - "infra/terraform/**"
+      - "performance/**"
+      - "deploy/**"
   push:
     branches:
       - main
       - master
+    paths-ignore:
+      - "docs/**"
+      - ".kiro/**"
+      - ".zap/**"
+      - "infra/terraform/**"
+      - "performance/**"
+      - "deploy/**"
 
 concurrency:
   group: ci-${{ github.ref }}

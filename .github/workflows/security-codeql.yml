@@ -1,12 +1,26 @@
 name: Security - CodeQL
+run-name: CodeQL - ${{ github.ref_name }} by ${{ github.actor }}
 
 on:
-  push:
-    branches: [main, master]
   pull_request:
     branches: [main, master]
+    paths:
+      - "**/*.py"
+      - "**/*.js"
+      - "**/*.ts"
+      - "**/*.tsx"
+      - "**/*.jsx"
+      - "requirements-ci.txt"
+      - "**/package.json"
+      - "**/package-lock.json"
+      - ".github/workflows/security-codeql.yml"
+  workflow_dispatch:
   schedule:
     - cron: "30 4 * * 1"
+
+concurrency:
+  group: codeql-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   analyze:

@@ -1,22 +1,19 @@
 name: Publish Container Images
+run-name: Publish images - ${{ github.ref_name }} by ${{ github.actor }}
 
 on:
-  workflow_run:
-    workflows: ["CI"]
-    branches:
-      - main
-      - master
-    types:
-      - completed
   push:
     tags:
       - "v*"
   workflow_dispatch:
 
+concurrency:
+  group: publish-images-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   publish:
     runs-on: ubuntu-latest
-    if: ${{ github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success' }}
     permissions:
       contents: read
       packages: write

@@ -1,8 +1,24 @@
 name: PR Preview Environment
+run-name: "PR preview - #${{ github.event.pull_request.number }} by ${{ github.actor }}"
 
 on:
   pull_request:
     types: [opened, synchronize, reopened]
+    branches: [main, master]
+    paths:
+      - "**/*.py"
+      - "templates/**"
+      - "greatkart/static/**"
+      - "requirements-ci.txt"
+      - "Dockerfile"
+      - "Dockerfile.worker"
+      - "deploy/**"
+      - "infra/terraform/**"
+      - ".github/workflows/preview-environment.yml"
+
+concurrency:
+  group: preview-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
 
 jobs:
   deploy-preview:

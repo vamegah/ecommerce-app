@@ -1,13 +1,7 @@
 name: Deploy ECS Rolling
+run-name: Deploy ECS rolling - ${{ inputs.target_env || 'manual' }} by ${{ github.actor }}
 
 on:
-  workflow_run:
-    workflows: ["Publish Container Images"]
-    branches:
-      - main
-      - master
-    types:
-      - completed
   workflow_dispatch:
     inputs:
       target_env:
@@ -27,10 +21,13 @@ on:
         required: true
         type: string
 
+concurrency:
+  group: deploy-ecs-${{ inputs.target_env || 'manual' }}
+  cancel-in-progress: false
+
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
     environment: ${{ inputs.target_env || 'staging' }}
     permissions:
       id-token: write

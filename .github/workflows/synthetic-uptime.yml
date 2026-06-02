@@ -1,4 +1,5 @@
 name: Synthetic Uptime Checks
+run-name: Synthetic uptime - ${{ github.ref_name }} by ${{ github.actor }}
 
 # NOTE: GitHub Actions schedules are unreliable for uptime monitoring and consume
 # Actions minutes. This workflow now manages AWS CloudWatch Synthetics canaries
@@ -7,10 +8,6 @@ name: Synthetic Uptime Checks
 # provisions/updates them on demand or after a deployment.
 
 on:
-  workflow_run:
-    workflows: ["Deploy ECS Rolling"]
-    types:
-      - completed
   workflow_dispatch:
 
 jobs:

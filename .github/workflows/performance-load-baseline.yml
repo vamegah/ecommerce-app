@@ -1,4 +1,5 @@
 name: Performance Load Baseline
+run-name: Performance load baseline - ${{ github.ref_name }} by ${{ github.actor }}
 
 on:
   workflow_dispatch:

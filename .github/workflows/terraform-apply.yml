@@ -1,4 +1,5 @@
 name: Terraform Apply
+run-name: Terraform apply - ${{ inputs.target_env }} by ${{ github.actor }}
 
 on:
   workflow_dispatch:

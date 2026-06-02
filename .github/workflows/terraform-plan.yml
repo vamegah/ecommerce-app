@@ -1,7 +1,9 @@
 name: Terraform Plan
+run-name: Terraform plan - ${{ inputs.target_env || github.ref_name }} by ${{ github.actor }}
 
 on:
   pull_request:
+    branches: [main, master]
     paths:
       - "infra/terraform/**"
   workflow_dispatch:
@@ -15,6 +17,10 @@ on:
           - dev
           - staging
           - prod
+
+concurrency:
+  group: terraform-plan-${{ github.ref }}-${{ inputs.target_env || 'pr' }}
+  cancel-in-progress: true
 
 jobs:
   plan:
