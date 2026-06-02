@@ -3,6 +3,7 @@ from carts.models import CartItem
 from .forms import OrderForm
 from .models import Order, OrderProduct, Payment
 import datetime
+import logging
 from django.http import JsonResponse
 import json
 from decimal import Decimal
@@ -17,80 +18,13 @@ except ImportError:
     def shared_task(func):
         return func
 
+logger = logging.getLogger(__name__)
 
-
-
-
-# Create your views here.
-# def payments(request):
-#     body = json.loads(request.body)
-#     order = Order.objects.get(user=request.user, is_ordered=False, order_number=body['orderID'])
-
-#     # Store transaction details inside Payment model
-#     payment = Payment(
-#         user = request.user,
-#         payment_id = body['transID'],
-#         payment_method = body['payment_method'],
-#         amount_paid = order.order_total,
-#         status = body['status'],
-#     )
-#     payment.save()
-
-#     order.payment = payment
-#     order.is_ordered = True
-#     order.save()
-
-#     # Move the cart items to Order Product table
-#     cart_items = CartItem.objects.filter(user=request.user)
-
-#     for item in cart_items:
-#         order_product = OrderProduct()
-#         order_product.order_id = order.id
-#         order_product.payment = payment
-#         order_product.user_id = request.user.id
-#         order_product.product_id = item.product_id
-#         order_product.quantity = item.quantity
-#         order_product.product_price = item.product.price
-#         order_product.ordered = True
-#         order_product.save()
-
-#         cart_item = CartItem.objects.get(id=item.id)
-#         product_variation = cart_item.variations.all()
-#         order_product = OrderProduct.objects.get(id=order_product.id)
-#         order_product.variations.set(product_variation)
-#         order_product.save()
-
-
-#         # Reduce the quantity of the sold products
-#         product = Product.objects.get(id=item.product_id)
-#         product.stock -= item.quantity
-#         product.save()
-
-#     # Clear cart
-#     CartItem.objects.filter(user=request.user).delete()
-
-#     # Send order recieved email to customer
-#     mail_subject = 'Thank you for your order!'
-#     message = render_to_string('orders/order_recieved_email.html', {
-#         'user': request.user,
-#         'order': order,
-#     })
-#     to_email = request.user.email
-#     send_email = EmailMessage(mail_subject, message, to=[to_email])
-#     send_email.send()
-
-#     # Send order number and transaction id back to sendData method via JsonResponse
-#     data = {
-#         'order_number': order.order_number,
-#         'transID': payment.payment_id,
-#     }
-#     return JsonResponse(data)
 
 def payments(request):
     body = json.loads(request.body)
     order = Order.objects.get(user=request.user, is_ordered=False, order_number=body['orderID'])
 
-    # Create payment and update order in a transaction
     with transaction.atomic():
         payment = Payment.objects.create(
             user=request.user,
@@ -99,13 +33,31 @@ def payments(request):
             amount_paid=order.order_total,
             status=body['status'],
         )
-        
+
         Order.objects.filter(id=order.id).update(
             payment=payment,
-            is_ordered=True
+            is_ordered=True,
         )
-        
-        # Record coupon redemption after the order is marked paid.
+
+        # Create OrderProduct records, decrement stock, and clear the cart
+        cart_items = CartItem.objects.filter(user=request.user).select_related('product')
+        for item in cart_items:
+            order_product = OrderProduct.objects.create(
+                order=order,
+                payment=payment,
+                user=request.user,
+                product=item.product,
+                quantity=item.quantity,
+                product_price=item.product.price,
+                ordered=True,
+            )
+            order_product.variations.set(item.variations.all())
+            Product.objects.filter(id=item.product_id).update(
+                stock=F('stock') - item.quantity
+            )
+        cart_items.delete()
+
+        # Record coupon redemption after the order is marked paid
         if order.coupon_code:
             from coupons.models import Coupon
             from coupons.tracker import RedemptionTracker
@@ -119,14 +71,12 @@ def payments(request):
                 )
             except Coupon.DoesNotExist:
                 pass
-        
+
         # Clear coupon from session
         from coupons.services import CouponSessionService
         CouponSessionService(request).clear_coupon()
 
-    # Rest of the code remains the same until the email part...
-
-    # Send email asynchronously with serializable data
+    # Send order confirmation email asynchronously
     email_kwargs = {
         'subject': 'Thank you for your order!',
         'template': 'orders/order_recieved_email.html',
@@ -152,7 +102,7 @@ def payments(request):
                 'status': order.status,
             }
         },
-        'recipient': request.user.email
+        'recipient': request.user.email,
     }
     if hasattr(send_order_email, 'delay'):
         send_order_email.delay(**email_kwargs)
@@ -164,37 +114,29 @@ def payments(request):
         'transID': payment.payment_id,
     })
 
+
 @shared_task
 def send_order_email(subject, template, context, recipient):
-    """
-    Send order confirmation email asynchronously
-    """
     message = render_to_string(template, context)
     email = EmailMessage(subject, message, to=[recipient])
     return email.send()
 
 
-def place_order(request, total=0, quantity=0,):
+def place_order(request, total=0, quantity=0):
     current_user = request.user
 
-    # If the cart count is less than or equal to 0, then redirect back to shop
     cart_items = CartItem.objects.filter(user=current_user)
-    cart_count = cart_items.count()
-    if cart_count <= 0:
+    if cart_items.count() <= 0:
         return redirect('store')
 
-    grand_total = 0
-    tax = 0
     discount_amount = Decimal('0.00')
     coupon_code = None
-    
+
     for cart_item in cart_items:
         total += (cart_item.product.price * cart_item.quantity)
         quantity += cart_item.quantity
-    
-    # Re-validate any session coupon immediately before order creation.
+
     from coupons.services import CouponSessionService
-    from coupons.utils import DiscountEngine
 
     coupon_service = CouponSessionService(request)
     applied_coupon, calculated_discount, coupon_error = coupon_service.get_applied_coupon(Decimal(str(total)))
@@ -204,9 +146,9 @@ def place_order(request, total=0, quantity=0,):
     elif applied_coupon:
         coupon_code = applied_coupon.code
         discount_amount = calculated_discount
-    
+
     discounted_total = max(Decimal(str(total)) - discount_amount, Decimal('0.00'))
-    tax = (Decimal('0.02') * discounted_total)
+    tax = Decimal('0.02') * discounted_total
     grand_total = discounted_total + tax
 
     if request.method == 'POST':
@@ -216,11 +158,8 @@ def place_order(request, total=0, quantity=0,):
         if selected_address_id:
             try:
                 from addresses.services import CheckoutAddressService
-
                 selected_checkout_address = CheckoutAddressService().select_address_for_order(
-                    current_user,
-                    'pending',
-                    selected_address_id,
+                    current_user, 'pending', selected_address_id,
                 )
                 post_data['address_line_1'] = selected_checkout_address.street
                 post_data['address_line_2'] = selected_checkout_address.apartment
@@ -234,10 +173,7 @@ def place_order(request, total=0, quantity=0,):
                 pass
 
         form = OrderForm(post_data)
-        print(form.errors)
-        
         if form.is_valid():
-            # Store all the billing information inside Order table
             data = Order()
             data.user = current_user
             data.first_name = form.cleaned_data['first_name']
@@ -256,10 +192,10 @@ def place_order(request, total=0, quantity=0,):
             data.discount_amount = discount_amount
             data.ip = request.META.get('REMOTE_ADDR')
             data.save()
+
             if not selected_checkout_address and form.cleaned_data.get('save_checkout_address'):
                 try:
                     from addresses.services import CheckoutAddressService
-
                     CheckoutAddressService().save_new_checkout_address(
                         current_user,
                         {
@@ -275,17 +211,14 @@ def place_order(request, total=0, quantity=0,):
                     )
                 except Exception:
                     pass
-            # Generate order number
-            yr = int(datetime.date.today().strftime('%Y'))
-            dt = int(datetime.date.today().strftime('%d'))
-            mt = int(datetime.date.today().strftime('%m'))
-            d = datetime.date(yr,mt,dt)
-            current_date = d.strftime("%Y%m%d") #20210305
+
+            current_date = datetime.date.today().strftime('%Y%m%d')
             order_number = current_date + str(data.id)
             data.order_number = order_number
             data.save()
 
             order = Order.objects.get(user=current_user, is_ordered=False, order_number=order_number)
+            from django.conf import settings as django_settings
             context = {
                 'order': order,
                 'cart_items': cart_items,
@@ -293,9 +226,12 @@ def place_order(request, total=0, quantity=0,):
                 'discount_amount': discount_amount,
                 'tax': float(tax),
                 'grand_total': float(grand_total),
+                'PAYPAL_CLIENT_ID': django_settings.PAYPAL_CLIENT_ID,
             }
             return render(request, 'orders/payments.html', context)
-    # Add a return statement for non-POST requests
+        else:
+            logger.debug('Order form errors: %s', form.errors)
+
     return redirect('checkout')
 
 

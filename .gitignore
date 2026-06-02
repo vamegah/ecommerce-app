@@ -67,6 +67,31 @@ coverage.xml
 .hypothesis/
 .pytest_cache/
 cover/
+coverage/
+
+# OS/editor metadata
+.DS_Store
+Thumbs.db
+
+# Frontend dependencies/build artifacts
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+*.tsbuildinfo
+
+# Collected static assets
+staticfiles/
+
+# Terraform
+*.tfplan
+tfplan
+.terraform/
+.terraform.lock.hcl
+*.tfvars
+!*.tfvars.example
+terraform.tfstate
+terraform.tfstate.backup
 
 # Translations
 *.mo

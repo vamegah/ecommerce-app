@@ -97,7 +97,7 @@ jobs:
 
   deploy-production:
     name: Deploy to Production
-    needs: build-artifact
+    needs: [build-artifact, deploy-staging]
     if: ${{ secrets.PROD_DEPLOY_HOST != '' && secrets.PROD_DEPLOY_USER != '' && secrets.PROD_DEPLOY_KEY != '' && secrets.PROD_DEPLOY_PATH != '' }}
     runs-on: ubuntu-latest
     environment: production

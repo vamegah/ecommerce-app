@@ -1,23 +1,40 @@
 name: Synthetic Uptime Checks
 
+# NOTE: GitHub Actions schedules are unreliable for uptime monitoring and consume
+# Actions minutes. This workflow now manages AWS CloudWatch Synthetics canaries
+# which run independently of GitHub and provide reliable, sub-minute alerting.
+# The canaries themselves execute every minute inside AWS; this workflow only
+# provisions/updates them on demand or after a deployment.
+
 on:
-  schedule:
-    - cron: "*/10 * * * *"
+  workflow_run:
+    workflows: ["Deploy ECS Rolling"]
+    types:
+      - completed
   workflow_dispatch:
 
 jobs:
-  check-staging:
+  sync-canaries:
     runs-on: ubuntu-latest
-    environment: staging
-    if: ${{ secrets.STAGING_PUBLIC_URL != '' }}
+    permissions:
+      id-token: write
+      contents: read
     steps:
-      - name: Check staging health endpoint
-        run: curl -fsS "${{ secrets.STAGING_PUBLIC_URL }}/healthz/"
+      - name: Checkout
+        uses: actions/checkout@v4
 
-  check-production:
-    runs-on: ubuntu-latest
-    environment: production
-    if: ${{ secrets.PROD_PUBLIC_URL != '' }}
-    steps:
-      - name: Check production health endpoint
-        run: curl -fsS "${{ secrets.PROD_PUBLIC_URL }}/healthz/"
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Ensure staging canary is running
+        if: ${{ secrets.SYNTHETICS_CANARY_STAGING != '' }}
+        run: |
+          aws synthetics start-canary --name "${{ secrets.SYNTHETICS_CANARY_STAGING }}" || true
+
+      - name: Ensure production canary is running
+        if: ${{ secrets.SYNTHETICS_CANARY_PROD != '' }}
+        run: |
+          aws synthetics start-canary --name "${{ secrets.SYNTHETICS_CANARY_PROD }}" || true

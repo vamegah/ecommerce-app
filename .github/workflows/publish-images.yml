@@ -1,10 +1,14 @@
 name: Publish Container Images
 
 on:
-  push:
+  workflow_run:
+    workflows: ["CI"]
     branches:
       - main
       - master
+    types:
+      - completed
+  push:
     tags:
       - "v*"
   workflow_dispatch:
@@ -12,9 +16,11 @@ on:
 jobs:
   publish:
     runs-on: ubuntu-latest
+    if: ${{ github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success' }}
     permissions:
       contents: read
       packages: write
+      id-token: write
     steps:
       - name: Checkout
         uses: actions/checkout@v4

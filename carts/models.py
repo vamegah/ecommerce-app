@@ -21,8 +21,9 @@ class CartItem(models.Model):
     class Meta:
         db_table = 'CartItems'
 
+    @property
     def sub_total(self):
         return self.product.price * self.quantity
 
-    def __unicode__(self):
-        return self.product # Return the product name for better readability in the admin interface
+    def __str__(self):
+        return self.product.product_name

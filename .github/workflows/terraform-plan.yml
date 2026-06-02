@@ -25,6 +25,9 @@ jobs:
         env_name: [dev, staging, prod]
     if: ${{ github.event_name == 'pull_request' || matrix.env_name == inputs.target_env }}
     environment: terraform-${{ matrix.env_name }}
+    permissions:
+      id-token: write
+      contents: read
     defaults:
       run:
         working-directory: infra/terraform/environments/${{ matrix.env_name }}
@@ -40,12 +43,17 @@ jobs:
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
           aws-region: ${{ secrets.AWS_REGION }}
 
       - name: Terraform init (remote state)
-        run: terraform init -backend-config=backend.hcl.example -input=false
+        run: |
+          terraform init \
+            -backend-config="bucket=${{ secrets.TF_STATE_BUCKET }}" \
+            -backend-config="key=${{ matrix.env_name }}/terraform.tfstate" \
+            -backend-config="region=${{ secrets.AWS_REGION }}" \
+            -backend-config="dynamodb_table=${{ secrets.TF_LOCK_TABLE }}" \
+            -input=false
 
       - name: Terraform fmt check
         run: terraform fmt -check -recursive ../..

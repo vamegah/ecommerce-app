@@ -50,9 +50,10 @@ def product_to_payload(product):
     )
     rating = product.average_review() or 0
     review_count = product.count_review() or 0
+    price = float(product.price)
     available = product.is_available and product.stock > 0
     attributes = [
-        _attribute("Price", product.price, "PRICING", "CURRENCY"),
+        _attribute("Price", price, "PRICING", "CURRENCY"),
         _attribute("Rating", float(rating), "GENERAL", "RATING"),
         _attribute("Reviews", int(review_count), "GENERAL", "NUMBER"),
         _attribute("Category", product.category.category_name, "GENERAL", "TEXT"),
@@ -70,7 +71,7 @@ def product_to_payload(product):
     return {
         "id": str(product.id),
         "name": product.product_name,
-        "price": product.price,
+        "price": price,
         "imageUrl": _image_url(product),
         "attributes": attributes,
         "available": available,

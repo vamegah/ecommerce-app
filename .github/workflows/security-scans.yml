@@ -32,23 +32,23 @@ jobs:
 
       - name: NPM audit (addresses)
         working-directory: addresses
-        run: npm audit --json > ../npm-audit-addresses.json || true
+        run: npm audit --audit-level=high --json > ../npm-audit-addresses.json
 
       - name: NPM audit (comparison)
         working-directory: comparison
-        run: npm audit --json > ../npm-audit-comparison.json || true
+        run: npm audit --audit-level=high --json > ../npm-audit-comparison.json
 
       - name: NPM audit (filters)
         working-directory: filters
-        run: npm audit --json > ../npm-audit-filters.json || true
+        run: npm audit --audit-level=high --json > ../npm-audit-filters.json
 
       - name: NPM audit (inventory_alerts)
         working-directory: inventory_alerts
-        run: npm audit --json > ../npm-audit-inventory-alerts.json || true
+        run: npm audit --audit-level=high --json > ../npm-audit-inventory-alerts.json
 
       - name: NPM audit (orders/tracking)
         working-directory: orders/tracking
-        run: npm audit --json > ../../npm-audit-orders-tracking.json || true
+        run: npm audit --audit-level=high --json > ../../npm-audit-orders-tracking.json
 
       - name: Upload dependency audit artifacts
         uses: actions/upload-artifact@v4
