@@ -299,6 +299,18 @@ class Dev(Configuration):
         if os.environ.get('SILENCE_IMAGEFIELD_CHECKS') == '1':
             SILENCED_SYSTEM_CHECKS = ['fields.E210']
 
+        @classmethod
+        def post_setup(cls):
+            super().post_setup()
+            import sys
+
+            # django-configurations copies global settings into this module;
+            # remove deprecated transitional defaults so Django doesn't warn.
+            settings_module = sys.modules[__name__]
+            for setting_name in ('FORMS_URLFIELD_ASSUME_HTTPS',):
+                if hasattr(settings_module, setting_name):
+                    delattr(settings_module, setting_name)
+
 
 class Prod(Dev):
     DEBUG = values.BooleanValue(False)
