@@ -33,7 +33,7 @@ jobs:
   django-tests:
     name: Django Tests
     runs-on: ubuntu-latest
-    if: github.actor != 'dependabot[bot]' || contains(github.event.pull_request.title, 'requirements')
+    if: github.actor != 'dependabot[bot]'
     environment: ci
     env:
       DJANGO_SETTINGS_MODULE: greatkartecommerce.settings
@@ -84,6 +84,7 @@ jobs:
   node-tests:
     name: Node Tests (${{ matrix.package_dir }})
     runs-on: ubuntu-latest
+    if: github.actor != 'dependabot[bot]'
     strategy:
       fail-fast: false
       matrix:
@@ -122,7 +123,7 @@ jobs:
   docker-build-smoke:
     name: Docker Build Smoke
     runs-on: ubuntu-latest
-    if: github.actor != 'dependabot[bot]' || contains(github.event.pull_request.title, 'Dockerfile')
+    if: github.actor != 'dependabot[bot]'
     steps:
       - name: Checkout
         uses: actions/checkout@v4

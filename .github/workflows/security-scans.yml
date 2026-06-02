@@ -2,20 +2,6 @@ name: Security - Dependency, Container, Secret, IaC
 run-name: Security scans - ${{ github.ref_name }} by ${{ github.actor }}
 
 on:
-  pull_request:
-    branches: [main, master]
-    paths:
-      - "requirements-ci.txt"
-      - "**/package.json"
-      - "**/package-lock.json"
-      - "Dockerfile"
-      - "Dockerfile.worker"
-      - "docker-compose.yml"
-      - "infra/terraform/**"
-      - "security/**"
-      - ".gitleaks.toml"
-      - ".zap/**"
-      - ".github/workflows/security-scans.yml"
   workflow_dispatch:
   schedule:
     - cron: "45 3 * * 1"

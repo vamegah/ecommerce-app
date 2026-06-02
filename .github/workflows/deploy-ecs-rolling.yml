@@ -40,11 +40,19 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Validate AWS configuration
+        env:
+          AWS_ROLE_ARN: ${{ secrets.AWS_ROLE_ARN }}
+          AWS_REGION: ${{ vars.AWS_REGION || secrets.AWS_REGION }}
+        run: |
+          test -n "$AWS_ROLE_ARN" || { echo "::error::Set AWS_ROLE_ARN as a repository or environment secret."; exit 1; }
+          test -n "$AWS_REGION" || { echo "::error::Set AWS_REGION as a repository/environment variable or secret."; exit 1; }
+
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
           role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
-          aws-region: ${{ secrets.AWS_REGION }}
+          aws-region: ${{ vars.AWS_REGION || secrets.AWS_REGION }}
 
       - name: Install jq
         run: sudo apt-get update && sudo apt-get install -y postgresql-client
@@ -72,7 +80,7 @@ jobs:
       - name: Capture current task definitions
         id: capture
         env:
-          AWS_REGION: ${{ secrets.AWS_REGION }}
+          AWS_REGION: ${{ vars.AWS_REGION || secrets.AWS_REGION }}
           ECS_CLUSTER: ${{ secrets.ECS_CLUSTER }}
           ECS_SERVICE_WEB: ${{ secrets.ECS_SERVICE_WEB }}
           ECS_SERVICE_WORKER: ${{ secrets.ECS_SERVICE_WORKER }}
@@ -115,7 +123,7 @@ jobs:
 
       - name: Rolling deploy
         env:
-          AWS_REGION: ${{ secrets.AWS_REGION }}
+          AWS_REGION: ${{ vars.AWS_REGION || secrets.AWS_REGION }}
           ECS_CLUSTER: ${{ secrets.ECS_CLUSTER }}
           ECS_SERVICE_WEB: ${{ secrets.ECS_SERVICE_WEB }}
           ECS_SERVICE_WORKER: ${{ secrets.ECS_SERVICE_WORKER }}
@@ -142,15 +150,23 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Validate AWS configuration
+        env:
+          AWS_ROLE_ARN: ${{ secrets.AWS_ROLE_ARN }}
+          AWS_REGION: ${{ vars.AWS_REGION || secrets.AWS_REGION }}
+        run: |
+          test -n "$AWS_ROLE_ARN" || { echo "::error::Set AWS_ROLE_ARN as a repository or environment secret."; exit 1; }
+          test -n "$AWS_REGION" || { echo "::error::Set AWS_REGION as a repository/environment variable or secret."; exit 1; }
+
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
           role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
-          aws-region: ${{ secrets.AWS_REGION }}
+          aws-region: ${{ vars.AWS_REGION || secrets.AWS_REGION }}
 
       - name: Roll back ECS services
         env:
-          AWS_REGION: ${{ secrets.AWS_REGION }}
+          AWS_REGION: ${{ vars.AWS_REGION || secrets.AWS_REGION }}
           ECS_CLUSTER: ${{ secrets.ECS_CLUSTER }}
           ECS_SERVICE_WEB: ${{ secrets.ECS_SERVICE_WEB }}
           ECS_SERVICE_WORKER: ${{ secrets.ECS_SERVICE_WORKER }}
