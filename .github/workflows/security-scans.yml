@@ -69,7 +69,7 @@ jobs:
         run: npm audit --audit-level=high --json | tee ../../npm-audit-orders-tracking.json
 
       - name: Upload dependency audit artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: dependency-audits
           path: |
@@ -140,7 +140,7 @@ jobs:
           category: trivy-worker
 
       - name: Upload Trivy reports as artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: trivy-reports
           path: |
