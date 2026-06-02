@@ -156,12 +156,12 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Download dependency audit artifacts
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: dependency-audits
 
       - name: Download Trivy reports
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: trivy-reports
 
