@@ -11,5 +11,5 @@ redis==6.2.0
 django-redis==6.0.0
 celery==5.5.3
 sentry-sdk==2.30.0
-prometheus-client==0.22.1
+prometheus-client==0.25.0
 PyYAML==6.0.2
