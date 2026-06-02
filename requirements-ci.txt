@@ -6,7 +6,7 @@ django-session-timeout==0.1.0
 django-admin-thumbnails==0.2.9
 django-admin-honeypot==1.1.0
 hypothesis==6.153.0
-psycopg2-binary==2.9.10
+psycopg2-binary==2.9.12
 redis==6.2.0
 django-redis==6.0.0
 celery==5.5.3
