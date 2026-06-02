@@ -4,19 +4,28 @@
 {% block content %}
 
 
-<section class="section-content padding-y bg">
+<section class="section-pagetop store-pagetop">
+    <div class="container">
+        <span class="eyebrow">Your cart</span>
+        <h1 class="title-page">Review your order</h1>
+        <p>Adjust quantities, check totals, and continue to secure checkout.</p>
+    </div>
+</section>
+
+<section class="section-content cart-page">
     <div class="container">
 
-        <!-- ============================ COMPONENT 1 ================================= -->
         {% if not cart_items %}
-        <div class="alert alert-warning text-center" role="alert">
-            <h2>Your shopping cart is empty.</h2> <a href="{% url 'store' %}" class="btn btn-primary">Continue
-                Shopping</a>
+        <div class="empty-state">
+            <i class="fa fa-shopping-cart"></i>
+            <h3>Your shopping cart is empty</h3>
+            <p>Add a few products and they will appear here.</p>
+            <a href="{% url 'store' %}" class="btn btn-primary">Continue Shopping</a>
         </div>
         {% else %}
         <div class="row">
             <aside class="col-lg-9">
-                <div class="card">
+                <div class="card cart-items-panel">
                     <table class="table table-borderless table-shopping-cart">
                         <thead class="text-muted">
                             <tr class="small text-uppercase">
@@ -93,8 +102,9 @@
             </aside> <!-- col.// -->
             <aside class="col-lg-3">
 
-                <div class="card">
+                <div class="card cart-summary-panel">
                     <div class="card-body">
+                        <h5 class="summary-title">Order summary</h5>
                         <dl class="dlist-align">
                             <dt>Total price:</dt>
                             <dd class="text-right">$ {{total}}</dd>
@@ -121,7 +131,6 @@
 
         </div> <!-- row.// -->
         {% endif %}
-        <!-- ============================ COMPONENT 1 END .// ================================= -->
 
         {% include 'recommendations/cart_recommendations.html' with cart_recommendations=cart_recommendations %}
 

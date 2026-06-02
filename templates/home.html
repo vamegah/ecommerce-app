@@ -3,33 +3,72 @@
 
 {% block content %}
 
-<!-- ========================= SECTION MAIN ========================= -->
-<section class="section-intro padding-y-sm">
+<section class="home-hero" style="background-image: url('{% static 'images/banners/ban.png' %}');">
+    <div class="home-hero-overlay"></div>
     <div class="container">
-        <div class="intro-banner-wrap">
-            <img src="{% static 'images/banners/cover.jpg' %}" class="img-fluid rounded">
+        <div class="home-hero-content">
+            <span class="eyebrow">New season edit</span>
+            <h1>Find everyday essentials with style, speed, and confidence.</h1>
+            <p>Shop curated products, compare favorites, save wishlists, and check out without the clutter.</p>
+            <div class="hero-actions">
+                <a href="{% url 'store' %}" class="btn btn-primary btn-lg">Shop collection</a>
+                <a href="#popular-products" class="btn btn-light btn-lg">Browse popular</a>
+            </div>
         </div>
     </div>
 </section>
-<!-- ========================= SECTION MAIN END// ========================= -->
 
-<!-- ========================= SECTION  ========================= -->
-<section class="section-name padding-y-sm">
+<section class="trust-strip">
     <div class="container">
+        <div class="row">
+            <div class="col-md-4 trust-item">
+                <i class="fa fa-truck"></i>
+                <div>
+                    <strong>Fast delivery</strong>
+                    <span>Reliable shipping on every order</span>
+                </div>
+            </div>
+            <div class="col-md-4 trust-item">
+                <i class="fa fa-shield"></i>
+                <div>
+                    <strong>Secure checkout</strong>
+                    <span>Payments and customer data protected</span>
+                </div>
+            </div>
+            <div class="col-md-4 trust-item">
+                <i class="fa fa-heart"></i>
+                <div>
+                    <strong>Saved favorites</strong>
+                    <span>Build your wishlist as you shop</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
 
-        <header class="section-heading">
-            <a href="{% url 'store' %}" class="btn btn-outline-primary float-right">See all</a>
-            <h3 class="section-title">Popular products</h3>
+<section class="section-name product-section" id="popular-products">
+    <div class="container">
+        <header class="section-heading clean-heading">
+            <div>
+                <span class="eyebrow">Best picks</span>
+                <h2 class="section-title">Popular products</h2>
+            </div>
+            <a href="{% url 'store' %}" class="btn btn-outline-primary">See all</a>
         </header>
 
         <div class="row">
             {% for product in products %}
-            <div class="col-md-3">
-                <div class="card card-product-grid">
-                    <a href="{{ product.get_slug_url }}" class="img-wrap"> <img src="{{ product.images.url }}"> </a>
+            <div class="col-sm-6 col-lg-3 mb-4">
+                <div class="card card-product-grid product-card">
+                    <a href="{{ product.get_slug_url }}" class="img-wrap">
+                        <img src="{{ product.images.url }}" alt="{{ product.product_name }}">
+                    </a>
                     <figcaption class="info-wrap">
+                        <div class="product-meta-row">
+                            <span class="product-badge">{% if product.is_available and product.stock > 0 %}In stock{% else %}Sold out{% endif %}</span>
+                            <span class="price">$ {{ product.price }}</span>
+                        </div>
                         <a href="{{ product.get_slug_url }}" class="title">{{ product.product_name }}</a>
-                        <div class="price mt-1">$ {{ product.price }}</div>
                         <div class="rating-star">
                             <span>
                                 <i class="fa fa-star{% if product.average_review < 0.5 %}-o{% elif product.average_review >= 0.5 and product.average_review < 1 %}-half-o {% endif %}" aria-hidden="true"></i>
@@ -39,15 +78,14 @@
                                 <i class="fa fa-star{% if product.average_review < 4.5 %}-o{% elif product.average_review >= 4.5 and product.average_review < 5 %}-half-o {% endif %}" aria-hidden="true"></i>
                             </span>
                         </div>
+                        <a href="{{ product.get_slug_url }}" class="btn btn-primary btn-block mt-3">View details</a>
                     </figcaption>
                 </div>
             </div>
             {% endfor %}
         </div>
-
     </div>
 </section>
-<!-- ========================= SECTION  END// ========================= -->
 
 {% include 'recommendations/homepage_recommendations.html' %}
 

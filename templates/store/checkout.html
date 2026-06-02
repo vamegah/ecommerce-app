@@ -4,14 +4,20 @@
 {% block content %}
 
 
-<section class="section-content padding-y bg">
+<section class="section-pagetop store-pagetop">
     <div class="container">
+        <span class="eyebrow">Checkout</span>
+        <h1 class="title-page">Complete your order</h1>
+        <p>Confirm your delivery details and apply any coupon before placing the order.</p>
+    </div>
+</section>
 
-        <!-- ============================ COMPONENT 1 ================================= -->
+<section class="section-content checkout-page">
+    <div class="container">
 
         <div class="row">
             <aside class="col-lg-6">
-                <div class="card">
+                <div class="card checkout-panel">
                     <div class="card-body">
                         <h4 class="card-title mb-4">Billing Address</h4>
                         <form action="{% url 'place_order' %}" method="POST">
@@ -19,6 +25,7 @@
                             {% if address_selection.addresses %}
                             <div class="form-group">
                                 <label>Saved Addresses</label>
+                                <div class="saved-address-list">
                                 {% for address in address_selection.addresses %}
                                 <div class="custom-control custom-radio mb-2">
                                     <input type="radio" id="saved-address-{{ address.id }}" name="selected_address_id"
@@ -38,6 +45,7 @@
                                     </label>
                                 </div>
                                 {% endfor %}
+                                </div>
                                 <div class="custom-control custom-radio mb-3">
                                     <input type="radio" id="saved-address-new" name="selected_address_id" class="custom-control-input" value="">
                                     <label class="custom-control-label" for="saved-address-new">Use a new address</label>
@@ -102,11 +110,6 @@
                                     <span class="custom-control-label">Save this address for future orders</span>
                                 </label>
                             </div>
-                            <div class="form-row">
-                                <button type="submit" name="submit" class="btn btn-danger btn-block">Save &
-                                    Continue</button>
-                                </div>
-
 
                     </div>
                 </div> <!-- card.// -->
@@ -114,8 +117,9 @@
             </aside> <!-- col.// -->
             <aside class="col-lg-6">
 
-                <div class="card">
+                <div class="card checkout-panel order-summary-panel">
                     <div class="card-body">
+                        <h4 class="card-title mb-4">Order Summary</h4>
                         <table class="table table-borderless table-shopping-cart">
                             <thead class="text-muted">
                                 <tr class="small text-uppercase">
@@ -162,44 +166,40 @@
                             </tbody>
                         </table>
 
-                        <div class="card mt-3">
-                            <div class="card-body">
-                                <h5>Have a coupon?</h5>
-                                <div class="input-group">
-                                    <input type="text" id="coupon-code" class="form-control" placeholder="Enter coupon code">
-                                    <div class="input-group-append">
-                                        <button type="button" class="btn btn-primary" id="apply-coupon">Apply</button>
-                                    </div>
+                        <div class="checkout-subpanel mt-3">
+                            <h5>Have a coupon?</h5>
+                            <div class="input-group">
+                                <input type="text" id="coupon-code" class="form-control" placeholder="Enter coupon code">
+                                <div class="input-group-append">
+                                    <button type="button" class="btn btn-primary" id="apply-coupon">Apply</button>
                                 </div>
-                                <div id="coupon-error" class="text-danger mt-2" style="display:none;"></div>
-                                <div id="coupon-success" class="text-success mt-2" style="display:none;"></div>
                             </div>
+                            <div id="coupon-error" class="text-danger mt-2" style="display:none;"></div>
+                            <div id="coupon-success" class="text-success mt-2" style="display:none;"></div>
                         </div>
 
-                        <div class="card mt-3">
-                            <div class="card-body">
-                                <dl class="dlist-align">
-                                    <dt>Subtotal:</dt>
-                                    <dd class="text-right">$<span id="summary-subtotal">{{ total }}</span></dd>
-                                </dl>
-                                <dl class="dlist-align" id="discount-row" {% if not applied_coupon and not request.session.coupon_code %}style="display:none;"{% endif %}>
-                                    <dt>Discount (<span id="summary-coupon-code">{% if applied_coupon %}{{ applied_coupon.code }}{% else %}{{ request.session.coupon_code }}{% endif %}</span>):
-                                        <button type="button" class="btn btn-sm btn-link" id="remove-coupon">Remove</button>
-                                    </dt>
-                                    <dd class="text-right text-success">-$<span id="summary-discount">{{ discount_amount|default:"0.00" }}</span></dd>
-                                </dl>
-                                <dl class="dlist-align">
-                                    <dt>Tax:</dt>
-                                    <dd class="text-right">$<span id="summary-tax">{{ tax }}</span></dd>
-                                </dl>
-                                <dl class="dlist-align">
-                                    <dt>Grand Total:</dt>
-                                    <dd class="text-right h5"><strong>$<span id="summary-grand-total">{{ grand_total }}</span></strong></dd>
-                                </dl>
-                            </div>
+                        <div class="checkout-subpanel mt-3">
+                            <dl class="dlist-align">
+                                <dt>Subtotal:</dt>
+                                <dd class="text-right">$<span id="summary-subtotal">{{ total }}</span></dd>
+                            </dl>
+                            <dl class="dlist-align" id="discount-row" {% if not applied_coupon and not request.session.coupon_code %}style="display:none;"{% endif %}>
+                                <dt>Discount (<span id="summary-coupon-code">{% if applied_coupon %}{{ applied_coupon.code }}{% else %}{{ request.session.coupon_code }}{% endif %}</span>):
+                                    <button type="button" class="btn btn-sm btn-link" id="remove-coupon">Remove</button>
+                                </dt>
+                                <dd class="text-right text-success">-$<span id="summary-discount">{{ discount_amount|default:"0.00" }}</span></dd>
+                            </dl>
+                            <dl class="dlist-align">
+                                <dt>Tax:</dt>
+                                <dd class="text-right">$<span id="summary-tax">{{ tax }}</span></dd>
+                            </dl>
+                            <dl class="dlist-align grand-total-row">
+                                <dt>Grand Total:</dt>
+                                <dd class="text-right h5"><strong>$<span id="summary-grand-total">{{ grand_total }}</span></strong></dd>
+                            </dl>
                         </div>
 
-                        <button type="submit" name="submit" class="btn btn-primary btn-block">Place Order</button>
+                        <button type="submit" name="submit" class="btn btn-primary btn-block btn-lg">Place Order</button>
                         <a href="{% url 'store' %}" class="btn btn-light btn-block">Continue Shopping</a>
                         </form>
                     </div> <!-- card-body.// -->
@@ -306,7 +306,6 @@ if (selectedSavedAddress) {
 
         </div> <!-- row.// -->
 
-        <!-- ============================ COMPONENT 1 END .// ================================= -->
         {% include 'recommendations/cart_recommendations.html' with cart_recommendations=checkout_recommendations %}
 
     </div> <!-- container .//  -->
