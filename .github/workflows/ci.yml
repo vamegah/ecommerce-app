@@ -44,6 +44,10 @@ jobs:
       EMAIL_HOST_USER: ci@example.com
       EMAIL_HOST_PASSWORD: ci-password
       EMAIL_BACKEND: django.core.mail.backends.locmem.EmailBackend
+      CELERY_BROKER_URL: memory://
+      CELERY_RESULT_BACKEND: cache+memory://
+      CELERY_TASK_ALWAYS_EAGER: "True"
+      CELERY_TASK_EAGER_PROPAGATES: "True"
     steps:
       - name: Checkout
         uses: actions/checkout@v4
