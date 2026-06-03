@@ -28,20 +28,56 @@
         const container = document.getElementById('products-container');
         if (!container) return;
 
+        container.replaceChildren();
+
         if (products.length === 0) {
-            container.innerHTML = '<p>No products found matching your filters.</p>';
+            const emptyMessage = document.createElement('p');
+            emptyMessage.textContent = 'No products found matching your filters.';
+            container.appendChild(emptyMessage);
             return;
         }
 
-        container.innerHTML = products.map(product => `
-            <div class="product-card">
-                <img src="${product.image}" alt="${product.name}">
-                <h3>${product.name}</h3>
-                <p class="price">$${product.price}</p>
-                <p class="rating">Rating: ${product.rating === null ? 'Not rated' : `${product.rating}/5`}</p>
-                <p class="stock">${product.inventoryCount > 0 ? 'In Stock' : 'Out of Stock'}</p>
-            </div>
-        `).join('');
+        products.forEach((product) => {
+            const card = document.createElement('div');
+            const image = document.createElement('img');
+            const name = document.createElement('h3');
+            const price = document.createElement('p');
+            const rating = document.createElement('p');
+            const stock = document.createElement('p');
+            const imageUrl = safeImageUrl(product.image);
+
+            card.className = 'product-card';
+
+            if (imageUrl) {
+                image.src = imageUrl;
+            }
+            image.alt = product.name || 'Product image';
+
+            name.textContent = product.name || 'Unnamed product';
+
+            price.className = 'price';
+            price.textContent = `$${product.price}`;
+
+            rating.className = 'rating';
+            rating.textContent = product.rating === null ? 'Rating: Not rated' : `Rating: ${product.rating}/5`;
+
+            stock.className = 'stock';
+            stock.textContent = product.inventoryCount > 0 ? 'In Stock' : 'Out of Stock';
+
+            card.append(image, name, price, rating, stock);
+            container.appendChild(card);
+        });
+    }
+
+    function safeImageUrl(value) {
+        if (!value) return '';
+
+        try {
+            const url = new URL(String(value), window.location.origin);
+            return ['http:', 'https:'].includes(url.protocol) ? url.href : '';
+        } catch (error) {
+            return '';
+        }
     }
 
     // Load products on page load

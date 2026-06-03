@@ -18,10 +18,19 @@
     </div>
 </footer>
 <script>
-    $(document).ready(function () {
-        $('.thumb a').click(function (e) {
-            e.preventDefault();
-            $('.mainImage img').attr('src', $(this).attr("href"));
-        })
-    })
+    document.addEventListener('DOMContentLoaded', function () {
+        document.querySelectorAll('.thumb a').forEach(function (thumbnailLink) {
+            thumbnailLink.addEventListener('click', function (event) {
+                var mainImage = document.querySelector('.mainImage img');
+                var imageUrl = thumbnailLink.getAttribute('href');
+
+                if (!mainImage || !imageUrl) {
+                    return;
+                }
+
+                event.preventDefault();
+                mainImage.setAttribute('src', imageUrl);
+            });
+        });
+    });
 </script>

@@ -15,21 +15,20 @@ class AvailabilityFilter {
     }
 
     private render(): void {
-        this.container.innerHTML = `
-            <fieldset class="filter-group availability-filter">
-                <legend>Availability</legend>
-                <div class="availability-options">
-                    <label class="checkbox-option" for="in-stock">
-                        <input type="checkbox" id="in-stock" aria-label="In stock items" />
-                        <span>In Stock</span>
-                    </label>
-                    <label class="checkbox-option" for="out-of-stock">
-                        <input type="checkbox" id="out-of-stock" aria-label="Out of stock items" />
-                        <span>Out of Stock</span>
-                    </label>
-                </div>
-            </fieldset>
-        `;
+        const fieldset = document.createElement('fieldset');
+        const legend = document.createElement('legend');
+        const options = document.createElement('div');
+
+        fieldset.className = 'filter-group availability-filter';
+        legend.textContent = 'Availability';
+        options.className = 'availability-options';
+        options.append(
+            this.createOption('in-stock', 'In stock items', 'In Stock'),
+            this.createOption('out-of-stock', 'Out of stock items', 'Out of Stock')
+        );
+
+        fieldset.append(legend, options);
+        this.container.replaceChildren(fieldset);
     }
 
     private attachElements(): void {
@@ -65,6 +64,24 @@ class AvailabilityFilter {
             throw new Error(`Availability filter element "${selector}" was not found`);
         }
         return element;
+    }
+
+    private createOption(id: string, ariaLabel: string, label: string): HTMLLabelElement {
+        const option = document.createElement('label');
+        const checkbox = document.createElement('input');
+        const text = document.createElement('span');
+
+        option.className = 'checkbox-option';
+        option.htmlFor = id;
+
+        checkbox.type = 'checkbox';
+        checkbox.id = id;
+        checkbox.setAttribute('aria-label', ariaLabel);
+
+        text.textContent = label;
+
+        option.append(checkbox, text);
+        return option;
     }
 }
 

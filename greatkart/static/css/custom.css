@@ -92,6 +92,28 @@ a:hover {
   box-shadow: 0 0 0 0.18rem rgba(20, 83, 45, 0.14);
 }
 
+.gap-2 {
+  gap: 0.5rem !important;
+}
+
+.breadcrumb {
+  font-size: 0.9rem;
+  margin-bottom: 1rem;
+}
+
+.breadcrumb-item + .breadcrumb-item::before {
+  content: "/";
+  color: var(--gk-muted);
+}
+
+.breadcrumb-item a {
+  color: var(--gk-primary);
+}
+
+.breadcrumb-item.active {
+  color: var(--gk-muted);
+}
+
 .card,
 .product-detail-card,
 .review-panel,
@@ -158,6 +180,48 @@ a:hover {
   padding: 16px 0;
 }
 
+.main-nav .navbar-brand {
+  flex: 0 0 auto;
+  margin-right: 0;
+}
+
+@media (min-width: 992px) {
+  .main-nav > .container {
+    align-items: center;
+    display: grid;
+    gap: clamp(28px, 4vw, 72px);
+    grid-template-columns: auto minmax(0, 1fr);
+    justify-content: stretch;
+    max-width: none;
+    padding-left: clamp(28px, 5vw, 96px);
+    padding-right: clamp(28px, 5vw, 96px);
+    width: 100%;
+  }
+
+  .main-nav.navbar-expand-lg .navbar-collapse {
+    align-items: center;
+    display: grid !important;
+    gap: clamp(20px, 2.6vw, 52px);
+    grid-template-columns: auto minmax(360px, 560px) auto;
+    justify-content: stretch;
+    min-width: 0;
+    width: 100%;
+  }
+
+  .nav-main-links {
+    justify-self: start;
+  }
+
+  .nav-search {
+    justify-self: stretch;
+    width: 100%;
+  }
+
+  .nav-actions {
+    justify-self: end;
+  }
+}
+
 .brand-wrap .logo,
 .navbar-brand .logo {
   height: 44px;
@@ -171,11 +235,18 @@ a:hover {
   font-weight: 700;
   padding-left: 0.8rem !important;
   padding-right: 0.8rem !important;
+  white-space: nowrap;
+}
+
+.nav-main-links {
+  flex: 0 0 auto;
+  gap: 2px;
 }
 
 .nav-search {
-  flex: 1 1 340px;
-  max-width: 460px;
+  flex: 1 1 380px;
+  max-width: 500px;
+  min-width: 280px;
 }
 
 .nav-search .input-group {
@@ -193,7 +264,10 @@ a:hover {
 .nav-actions {
   align-items: center;
   display: flex;
-  gap: 10px;
+  flex: 0 0 auto;
+  gap: 12px;
+  margin-left: auto;
+  white-space: nowrap;
 }
 
 .nav-account {
@@ -204,6 +278,7 @@ a:hover {
   line-height: 1.1;
   min-width: 112px;
   padding: 8px 10px;
+  white-space: nowrap;
 }
 
 .nav-account strong {
@@ -225,6 +300,7 @@ a:hover {
   min-width: 42px;
   padding: 8px 10px;
   position: relative;
+  white-space: nowrap;
 }
 
 .nav-icon-link .notify {
@@ -235,7 +311,20 @@ a:hover {
 
 .comparison-indicator.nav-icon-link {
   cursor: pointer;
+  flex: 0 0 76px;
   font-size: 0.86rem;
+  margin-left: 0;
+  min-width: 76px;
+}
+
+.nav-actions .comparison-indicator {
+  margin-left: 0;
+}
+
+.comparison-indicator.nav-icon-link [data-compare-count] {
+  display: inline-block;
+  min-width: 28px;
+  white-space: nowrap;
 }
 
 /* Home */
@@ -397,6 +486,11 @@ a:hover {
   font-size: 0.76rem;
   font-weight: 800;
   padding: 5px 9px;
+}
+
+.product-badge.bg-secondary {
+  background: #f3f4f6;
+  color: #6b7280;
 }
 
 .product-badge-floating {
@@ -884,6 +978,10 @@ ul.thumb:not(.product-thumbs) li img {
     color: #e11d48;
 }
 
+.wishlist-card-actions {
+    gap: 8px;
+}
+
 .wishlist-toast {
     position: fixed;
     left: 50%;
@@ -912,16 +1010,30 @@ ul.thumb:not(.product-thumbs) li img {
     position: static;
   }
 
+  .main-nav .container {
+    flex-wrap: wrap;
+  }
+
+  .main-nav .navbar-collapse {
+    flex-basis: 100%;
+  }
+
   .nav-search {
     margin: 14px 0;
     max-width: none;
+    min-width: 0;
     width: 100%;
   }
 
   .nav-actions {
     align-items: stretch;
     flex-wrap: wrap;
+    margin-left: 0;
     width: 100%;
+  }
+
+  .comparison-indicator.nav-icon-link {
+    flex: 1 1 90px;
   }
 
   .nav-account {

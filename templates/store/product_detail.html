@@ -5,6 +5,14 @@
 
 <section class="section-content product-detail-page">
     <div class="container">
+        <nav aria-label="breadcrumb" class="mb-3">
+            <ol class="breadcrumb bg-transparent p-0">
+                <li class="breadcrumb-item"><a href="{% url 'home' %}">Home</a></li>
+                <li class="breadcrumb-item"><a href="{% url 'store' %}">Store</a></li>
+                <li class="breadcrumb-item"><a href="{{ single_product.category.get_slug_url }}">{{ single_product.category.category_name }}</a></li>
+                <li class="breadcrumb-item active" aria-current="page">{{ single_product.product_name|truncatewords:5 }}</li>
+            </ol>
+        </nav>
         <div class="product-detail-card">
             <div class="row no-gutters">
                 <aside class="col-lg-6">

@@ -22,25 +22,32 @@ class PriceRangeFilter {
     }
 
     private render(): void {
-        this.container.innerHTML = `
-            <fieldset class="filter-group price-range-filter">
-                <legend>Price Range</legend>
-                <div class="price-inputs">
-                    <label class="price-input-label" for="price-min">
-                        <span class="currency-prefix">${this.currencySymbol}</span>
-                        <input type="number" id="price-min" min="0" step="0.01"
-                            inputmode="decimal" aria-label="Minimum price" />
-                    </label>
-                    <span class="price-separator" aria-hidden="true">-</span>
-                    <label class="price-input-label" for="price-max">
-                        <span class="currency-prefix">${this.currencySymbol}</span>
-                        <input type="number" id="price-max" min="0" step="0.01"
-                            inputmode="decimal" aria-label="Maximum price" />
-                    </label>
-                </div>
-                <div class="error-message" role="alert" aria-live="polite"></div>
-            </fieldset>
-        `;
+        const fieldset = document.createElement('fieldset');
+        const legend = document.createElement('legend');
+        const priceInputs = document.createElement('div');
+        const separator = document.createElement('span');
+        const error = document.createElement('div');
+
+        fieldset.className = 'filter-group price-range-filter';
+
+        legend.textContent = 'Price Range';
+
+        priceInputs.className = 'price-inputs';
+        separator.className = 'price-separator';
+        separator.setAttribute('aria-hidden', 'true');
+        separator.textContent = '-';
+        priceInputs.append(
+            this.createPriceInput('price-min', 'Minimum price'),
+            separator,
+            this.createPriceInput('price-max', 'Maximum price')
+        );
+
+        error.className = 'error-message';
+        error.setAttribute('role', 'alert');
+        error.setAttribute('aria-live', 'polite');
+
+        fieldset.append(legend, priceInputs, error);
+        this.container.replaceChildren(fieldset);
     }
 
     private attachElements(): void {
@@ -125,6 +132,28 @@ class PriceRangeFilter {
             throw new Error(`Price range filter element "${selector}" was not found`);
         }
         return element;
+    }
+
+    private createPriceInput(id: string, ariaLabel: string): HTMLLabelElement {
+        const label = document.createElement('label');
+        const prefix = document.createElement('span');
+        const input = document.createElement('input');
+
+        label.className = 'price-input-label';
+        label.htmlFor = id;
+
+        prefix.className = 'currency-prefix';
+        prefix.textContent = this.currencySymbol;
+
+        input.type = 'number';
+        input.id = id;
+        input.min = '0';
+        input.step = '0.01';
+        input.inputMode = 'decimal';
+        input.setAttribute('aria-label', ariaLabel);
+
+        label.append(prefix, input);
+        return label;
     }
 }
 

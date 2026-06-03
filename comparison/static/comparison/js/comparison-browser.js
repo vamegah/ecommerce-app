@@ -220,7 +220,7 @@
         }
         var label = indicator.querySelector('[data-compare-count]');
         if (label) {
-            label.textContent = count + ' / ' + config().maxProducts;
+            label.textContent = count + '/' + config().maxProducts;
         }
         indicator.classList.toggle('comparison-indicator-full', count >= config().maxProducts);
     }

@@ -50,6 +50,7 @@
     }
 
     function addToWishlist(productId, button) {
+        if (button) button.disabled = true;
         return fetch("/wishlist/add/" + productId + "/", {
             method: "POST",
             headers: {
@@ -73,10 +74,13 @@
             showToast(payload.message || "Added to wishlist.", "success");
         }).catch(function () {
             showToast("Unable to update wishlist.", "error");
+        }).finally(function () {
+            if (button) button.disabled = false;
         });
     }
 
     function removeFromWishlist(productId, button) {
+        if (button) button.disabled = true;
         return fetch("/wishlist/remove/" + productId + "/", {
             method: "POST",
             headers: {
@@ -101,11 +105,21 @@
             if (button && button.classList.contains("wishlist-remove-btn")) {
                 var card = button.closest(".col-md-4");
                 if (card) {
-                    card.remove();
+                    card.style.transition = "opacity 0.3s ease";
+                    card.style.opacity = "0";
+                    setTimeout(function () {
+                        card.remove();
+                        var container = document.querySelector(".section-content .row");
+                        if (container && container.querySelectorAll(".col-md-4").length === 0) {
+                            window.location.reload();
+                        }
+                    }, 300);
                 }
             }
         }).catch(function () {
             showToast("Unable to update wishlist.", "error");
+        }).finally(function () {
+            if (button) button.disabled = false;
         });
     }
 

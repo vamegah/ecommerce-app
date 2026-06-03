@@ -13,21 +13,36 @@ class FilterPanel {
     }
 
     private render(): void {
-        this.container.innerHTML = `
-            <aside class="filter-panel" aria-label="Product filters">
-                <div class="filter-header">
-                    <h2>Filters</h2>
-                    <button type="button" class="toggle-filters"
-                        aria-label="Toggle filters" aria-expanded="true">-</button>
-                </div>
-                <div class="filter-content">
-                    <div id="price-filter-container"></div>
-                    <div id="rating-filter-container"></div>
-                    <div id="availability-filter-container"></div>
-                    <div id="filter-summary-container"></div>
-                </div>
-            </aside>
-        `;
+        const panel = document.createElement('aside');
+        const header = document.createElement('div');
+        const heading = document.createElement('h2');
+        const toggleButton = document.createElement('button');
+        const content = document.createElement('div');
+
+        panel.className = 'filter-panel';
+        panel.setAttribute('aria-label', 'Product filters');
+
+        header.className = 'filter-header';
+
+        heading.textContent = 'Filters';
+
+        toggleButton.type = 'button';
+        toggleButton.className = 'toggle-filters';
+        toggleButton.setAttribute('aria-label', 'Toggle filters');
+        toggleButton.setAttribute('aria-expanded', 'true');
+        toggleButton.textContent = '-';
+
+        content.className = 'filter-content';
+        content.append(
+            this.createContainer('price-filter-container'),
+            this.createContainer('rating-filter-container'),
+            this.createContainer('availability-filter-container'),
+            this.createContainer('filter-summary-container')
+        );
+
+        header.append(heading, toggleButton);
+        panel.append(header, content);
+        this.container.replaceChildren(panel);
     }
 
     private attachEventListeners(): void {
@@ -94,6 +109,12 @@ class FilterPanel {
         if (!container) {
             throw new Error(`Filter panel container "${containerId}" was not found`);
         }
+        return container;
+    }
+
+    private createContainer(id: string): HTMLDivElement {
+        const container = document.createElement('div');
+        container.id = id;
         return container;
     }
 }

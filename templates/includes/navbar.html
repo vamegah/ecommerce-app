@@ -20,7 +20,7 @@
             </button>
 
             <div class="collapse navbar-collapse" id="mainNavbar">
-                <ul class="navbar-nav nav-main-links mr-lg-4">
+                <ul class="navbar-nav nav-main-links">
                     <li class="nav-item"><a class="nav-link" href="{% url 'store' %}">Store</a></li>
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" id="categoryMenu" role="button"
@@ -48,7 +48,7 @@
                     </div>
                 </form>
 
-                <div class="nav-actions ml-lg-auto">
+                <div class="nav-actions">
                     {% if user.id is None %}
                     <a class="nav-account" href="{% url 'login' %}">
                         <span class="eyebrow">Welcome</span>
@@ -74,9 +74,10 @@
                         data-comparison-url="{% url 'comparison:comparison_page' %}"
                         data-api-url="{% url 'comparison:api_comparison' %}"
                         data-shared-api-url="{% url 'comparison:api_shared_comparison' %}"
+                        title="Product Comparison"
                         aria-label="Product comparison">
                         <i class="fa fa-balance-scale"></i>
-                        <span data-compare-count>0 / 4</span>
+                        <span data-compare-count>0/4</span>
                     </button>
 
                     <a href="{% url 'cart' %}" class="nav-icon-link cart-link" aria-label="Cart">

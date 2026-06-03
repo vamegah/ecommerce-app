@@ -11,21 +11,23 @@ class RatingFilter {
     }
 
     private render(): void {
-        this.container.innerHTML = `
-            <fieldset class="filter-group rating-filter">
-                <legend>Minimum Rating</legend>
-                <div class="rating-options" role="radiogroup" aria-label="Minimum rating filter">
-                    <button type="button" class="rating-option selected" data-rating=""
-                        role="radio" aria-checked="true" aria-label="All ratings">All</button>
-                    ${this.ratings.map((rating) => `
-                        <button type="button" class="rating-option" data-rating="${rating}"
-                            role="radio" aria-checked="false" aria-label="${rating} stars and up">
-                            ${rating}+
-                        </button>
-                    `).join('')}
-                </div>
-            </fieldset>
-        `;
+        const fieldset = document.createElement('fieldset');
+        const legend = document.createElement('legend');
+        const options = document.createElement('div');
+
+        fieldset.className = 'filter-group rating-filter';
+        legend.textContent = 'Minimum Rating';
+
+        options.className = 'rating-options';
+        options.setAttribute('role', 'radiogroup');
+        options.setAttribute('aria-label', 'Minimum rating filter');
+        options.append(
+            this.createRatingButton(null),
+            ...this.ratings.map((rating) => this.createRatingButton(rating))
+        );
+
+        fieldset.append(legend, options);
+        this.container.replaceChildren(fieldset);
     }
 
     private attachEventListeners(): void {
@@ -86,6 +88,21 @@ class RatingFilter {
             throw new Error(`Rating filter container "${containerId}" was not found`);
         }
         return container;
+    }
+
+    private createRatingButton(rating: number | null): HTMLButtonElement {
+        const button = document.createElement('button');
+        const selected = rating === null;
+
+        button.type = 'button';
+        button.className = selected ? 'rating-option selected' : 'rating-option';
+        button.dataset.rating = rating === null ? '' : rating.toString();
+        button.setAttribute('role', 'radio');
+        button.setAttribute('aria-checked', selected.toString());
+        button.setAttribute('aria-label', rating === null ? 'All ratings' : `${rating} stars and up`);
+        button.textContent = rating === null ? 'All' : `${rating}+`;
+
+        return button;
     }
 }
 
